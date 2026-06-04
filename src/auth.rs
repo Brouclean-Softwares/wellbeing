@@ -13,7 +13,7 @@ use serde::Deserialize;
 
 pub mod google;
 
-pub const SESSION_ID: &str = "sid";
+pub const SESSION_TOKEN: &str = "sid";
 pub const REDIRECT_URI_AFTER_AUTH: &str = "redir_auth";
 
 pub fn init_router() -> Router<AppState> {
@@ -60,7 +60,7 @@ pub async fn sign_in(
 
 pub async fn sign_out(jar: PrivateCookieJar) -> impl IntoResponse {
     (
-        jar.clone().remove(Cookie::build(SESSION_ID).path("/")),
+        jar.clone().remove(Cookie::build(SESSION_TOKEN).path("/")),
         Redirect::to("/"),
     )
 }

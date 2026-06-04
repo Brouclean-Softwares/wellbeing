@@ -1,5 +1,5 @@
 use crate::AppState;
-use crate::auth::{REDIRECT_URI_AFTER_AUTH, SESSION_ID};
+use crate::auth::{REDIRECT_URI_AFTER_AUTH, SESSION_TOKEN};
 use crate::data::sessions::Session;
 use crate::data::users::User;
 use crate::errors::AppError;
@@ -58,7 +58,7 @@ pub async fn callback(
 
     let profile = profile.json::<User>().await?;
 
-    let cookie = Cookie::build((SESSION_ID, access_token.to_owned()))
+    let cookie = Cookie::build((SESSION_TOKEN, access_token.to_owned()))
         .same_site(SameSite::Lax)
         .path("/")
         .secure(true)

@@ -1,5 +1,5 @@
 use crate::AppState;
-use crate::auth::SESSION_ID;
+use crate::auth::SESSION_TOKEN;
 use crate::errors::AppError;
 use axum::extract::{FromRef, FromRequestParts};
 use axum_extra::extract::PrivateCookieJar;
@@ -8,7 +8,7 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug, sqlx::FromRow, Clone)]
 pub struct User {
-    pub id: Option<i32>,
+    pub id: Option<i64>,
     pub email: String,
     pub name: String,
     pub given_name: String,
@@ -45,7 +45,7 @@ where
         let cookie_jar: PrivateCookieJar<AppState> =
             PrivateCookieJar::from_request_parts(parts, &state).await?;
 
-        let cookie = cookie_jar.get(SESSION_ID).map(|c| c.value().to_owned());
+        let cookie = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
 
         if let Some(cookie) = cookie {
             let user = User::select_connected_user(&state, &cookie).await?;
@@ -72,7 +72,7 @@ impl User {
 
     pub fn optional_user_has_optional_id(
         optional_user: &Option<User>,
-        optional_id: &Option<i32>,
+        optional_id: &Option<i64>,
     ) -> bool {
         if let (Some(user), Some(id)) = (optional_user, optional_id) {
             if let Some(user_id) = user.id {
@@ -93,6 +93,8 @@ impl User {
         state: &AppState,
         cookie: &String,
     ) -> Result<Option<Self>, AppError> {
+        tracing::debug!("select_connected_user with token={}", cookie);
+
         let connected_user: Option<User> = sqlx::query_as(
             "SELECT users.id,
                         users.email,
@@ -103,7 +105,7 @@ impl User {
                 FROM sessions
                 LEFT JOIN USERS
                 ON sessions.user_id = users.id
-                WHERE sessions.session_id = $1
+                WHERE sessions.token = $1
                 AND sessions.expires_at > CURRENT_TIMESTAMP
                 LIMIT 1",
         )
@@ -115,10 +117,12 @@ impl User {
     }
 
     async fn extend_session(&self, state: &AppState, cookie: &String) -> Result<(), AppError> {
+        tracing::debug!("extend_session for user_id={}", self.id.unwrap_or_default());
+
         sqlx::query(
             "UPDATE sessions
                 SET expires_at = CURRENT_TIMESTAMP + interval '4 hours'
-                WHERE session_id = $1
+                WHERE token = $1
                 AND user_id = $2
                 AND expires_at > CURRENT_TIMESTAMP",
         )
@@ -130,8 +134,8 @@ impl User {
         Ok(())
     }
 
-    pub async fn select_by_id(state: &AppState, id: Option<i32>) -> Result<Option<Self>, AppError> {
-        tracing::debug!("select_by_id with id={:?}", id);
+    pub async fn select_by_id(state: &AppState, id: Option<i64>) -> Result<Option<Self>, AppError> {
+        tracing::debug!("select_by_id with id={}", id.unwrap_or_default());
 
         if let Some(user_id) = id {
             let user: Option<User> = sqlx::query_as(
@@ -156,7 +160,7 @@ impl User {
     }
 
     pub async fn select_by_mail(state: &AppState, mail: &String) -> Result<Option<Self>, AppError> {
-        tracing::debug!("select_by_mail with id={}", mail);
+        tracing::debug!("select_by_mail with mail={}", mail);
 
         let user: Option<User> = sqlx::query_as(
             "SELECT id,
@@ -177,6 +181,8 @@ impl User {
     }
 
     pub async fn upsert(&self, state: &AppState) -> Result<Self, AppError> {
+        tracing::debug!("upsert for id={}", self.id.unwrap_or_default());
+
         let existing_user = Self::select_by_mail(state, &self.email).await?;
 
         if let Some(user_id) = existing_user.and_then(|user| user.id) {

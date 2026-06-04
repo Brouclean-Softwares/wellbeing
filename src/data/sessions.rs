@@ -9,19 +9,21 @@ impl Session {
         user_mail: String,
         session_id: String,
     ) -> Result<Self, AppError> {
+        tracing::debug!("upsert for user_mail={}", user_mail);
+
         sqlx::query(
             "INSERT INTO sessions (
                     user_id,
-                    session_id,
+                    token,
                     expires_at
                 )
                 VALUES (
-                    (SELECT ID FROM USERS WHERE email = $1 LIMIT 1)
+                    (SELECT id FROM users WHERE email = $1 LIMIT 1)
                     , $2
                     , CURRENT_TIMESTAMP + interval '4 hours'
                 )
                 ON CONFLICT (user_id) DO UPDATE SET
-                session_id = excluded.session_id,
+                token = excluded.token,
                 expires_at = CURRENT_TIMESTAMP + interval '4 hours'",
         )
         .bind(user_mail)

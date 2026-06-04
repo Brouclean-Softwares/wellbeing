@@ -6,10 +6,10 @@
 
 {% block body %}
 
-{% if let Some(user_profile) = profile %}
+{% if let Some(user) = profile %}
 <div>
     <h2>
-        Bienvenue {{ user_profile.given_name }}
+        Bienvenue {{ user.given_name }} ❤️
     </h2>
 </div>
 

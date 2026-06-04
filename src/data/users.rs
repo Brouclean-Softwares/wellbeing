@@ -103,7 +103,7 @@ impl User {
                         users.family_name,
                         users.picture
                 FROM sessions
-                LEFT JOIN USERS
+                LEFT JOIN users
                 ON sessions.user_id = users.id
                 WHERE sessions.token = $1
                 AND sessions.expires_at > CURRENT_TIMESTAMP

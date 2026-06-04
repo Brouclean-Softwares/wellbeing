@@ -11,5 +11,6 @@ CREATE TABLE IF NOT EXISTS satisfying_moments (
 
 CREATE TABLE IF NOT EXISTS satisfying_moments_relatives (
     moment_id BIGINT NOT NULL REFERENCES satisfying_moments ON DELETE CASCADE,
-    relative_id BIGINT NOT NULL REFERENCES users ON DELETE CASCADE
+    relative_id BIGINT NOT NULL REFERENCES users ON DELETE CASCADE,
+    viewed_at TIMESTAMPTZ
 );

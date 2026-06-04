@@ -7,11 +7,9 @@
 {% block body %}
 
 {% if let Some(user) = profile %}
-<div>
-    <h2>
-        Bienvenue {{ user.given_name }} ❤️
-    </h2>
-</div>
+<h2>
+    Bienvenue {{ user.given_name }} ❤️
+</h2>
 
 {% else %}
 {% include "welcome.html" %}

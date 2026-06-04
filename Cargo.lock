@@ -2867,7 +2867,6 @@ dependencies = [
  "chrono",
  "dotenv",
  "http",
- "lazy_static",
  "oauth2",
  "reqwest",
  "serde",

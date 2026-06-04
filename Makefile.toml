@@ -1,0 +1,26 @@
+[tasks.format]
+description = "Format all rust files"
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all"]
+
+[tasks.clean]
+command = "cargo"
+args = ["clean"]
+
+[tasks.run]
+description = "Run the project"
+command = "cargo"
+args = ["run"]
+dependencies = ["format"]
+
+[tasks.build]
+description = "Build the project"
+command = "cargo"
+args = ["build", "--release"]
+dependencies = ["format", "clean"]
+
+[tasks.start]
+description = "Start the built project"
+command = "./target/release/wellbeing"
+dependencies = ["build"]

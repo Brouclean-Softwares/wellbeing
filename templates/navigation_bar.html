@@ -1,0 +1,65 @@
+<nav class="uk-navbar-container" style="background-color:#ffffff;">
+    <div class="uk-container uk-container-expand">
+        <div uk-navbar="mode: click">
+
+            <div class="uk-navbar-left">
+                <a class="uk-navbar-toggle uk-navbar-toggle-animate uk-hidden@m" uk-navbar-toggle-icon href="#"></a>
+                <div class="uk-navbar-dropdown">
+                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                    </ul>
+                </div>
+
+                <a class="uk-navbar-item uk-logo" href="/">
+                    <img src="/assets/images/logo_white_horizontal.png" width="175" height="150" alt="logo">
+                </a>
+
+                <ul class="uk-navbar-nav uk-visible@m">
+                </ul>
+            </div>
+
+            <div class="uk-navbar-right">
+            {% if let Some(user_profile) = profile %}
+                <div class="uk-navbar-item">
+                    <img class="uk-border-pill" src="{{ user_profile.picture }}" width="50" height="50" alt="{{ user_profile.name }}">
+                    <div class="uk-visible@m">
+                        <span class="uk-text-emphasis">
+                            {% if is_admin %}
+                                (Administrateur)
+                            {% else %}
+                                {{ user_profile.name }}
+                            {% endif %}
+                        </span>
+                        <br>{{ user_profile.email }}
+                    </div>
+                </div>
+                <div class="uk-navbar-dropdown">
+                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                        <li>
+                            <a href="/auth/profile">
+                                <span uk-icon="icon: user"></span>Profil
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/auth/sign_out">
+                                <span uk-icon="icon: sign-out"></span>Se déconnecter
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% else %}
+                <form action="/auth/sign_in" method="post"
+                      onsubmit="this.redirection_uri.value = window.location.pathname + window.location.search;">
+
+                    <input type="hidden" name="redirection_uri">
+
+                    <button class="uk-button uk-button-link" type="submit">
+                        <span  uk-icon="icon: sign-in"></span>
+                        <span class="uk-visible@m">Se connecter</span>
+                    </button>
+                </form>
+            {% endif %}
+            </div>
+
+        </div>
+    </div>
+</nav>

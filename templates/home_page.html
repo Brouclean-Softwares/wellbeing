@@ -1,0 +1,20 @@
+{% extends "page_base.html" %}
+
+{% block navbar %}
+{{ navigation_bar|escape("none") }}
+{% endblock %}
+
+{% block body %}
+
+{% if let Some(user_profile) = profile %}
+<div>
+    <h2>
+        Bienvenue {{ user_profile.given_name }}
+    </h2>
+</div>
+
+{% else %}
+{% include "welcome.html" %}
+{% endif %}
+
+{% endblock %}

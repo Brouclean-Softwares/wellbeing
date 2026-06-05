@@ -1,5 +1,6 @@
 use crate::AppState;
 use crate::app::templates::users::UserPage;
+use crate::data::sessions::Session;
 use crate::data::users::{MayBeUser, Profile};
 use axum::extract::State;
 use axum::routing::{get, post};
@@ -36,7 +37,7 @@ pub struct SignInForm {
 pub async fn sign_in(
     State(app_state): State<AppState>,
     MayBeUser(profile): MayBeUser,
-    jar: PrivateCookieJar,
+    cookie_jar: PrivateCookieJar,
     Form(form): Form<SignInForm>,
 ) -> impl IntoResponse {
     let redirection_uri_when_connected = form.redirection_uri;
@@ -46,18 +47,27 @@ pub async fn sign_in(
     } else {
         let url = google::connection_url(&app_state);
 
-        let jar = jar.add(Cookie::new(
+        let cookie_jar = cookie_jar.add(Cookie::new(
             REDIRECT_URI_AFTER_AUTH,
             redirection_uri_when_connected,
         ));
 
-        (jar, Redirect::to(&url)).into_response()
+        (cookie_jar, Redirect::to(&url)).into_response()
     }
 }
 
-pub async fn sign_out(jar: PrivateCookieJar) -> impl IntoResponse {
+pub async fn sign_out(
+    State(app_state): State<AppState>,
+    cookie_jar: PrivateCookieJar,
+) -> impl IntoResponse {
+    if let Some(token) = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned()) {
+        let _ = Session::delete_for_token(&app_state, &token).await;
+    }
+
     (
-        jar.clone().remove(Cookie::build(SESSION_TOKEN).path("/")),
+        cookie_jar
+            .clone()
+            .remove(Cookie::build(SESSION_TOKEN).path("/")),
         Redirect::to("/"),
     )
 }

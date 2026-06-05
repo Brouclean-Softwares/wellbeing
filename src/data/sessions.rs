@@ -49,6 +49,21 @@ impl Session {
         Ok(())
     }
 
+    pub async fn delete_for_token(state: &AppState, token: &String) -> Result<(), AppError> {
+        tracing::debug!("delete_for_token for token={}", token);
+
+        sqlx::query(
+            "DELETE
+                FROM sessions
+                WHERE token = $1",
+        )
+        .bind(token.clone())
+        .execute(&state.db)
+        .await?;
+
+        Ok(())
+    }
+
     pub async fn delete_expired(state: &AppState, user_id: &i64) -> Result<(), AppError> {
         tracing::debug!("delete_expired for user_id={}", user_id);
 

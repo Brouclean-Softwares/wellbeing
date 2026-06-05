@@ -9,7 +9,6 @@ use std::env;
 use tower_http::services::{ServeDir, ServeFile};
 use tracing::Level;
 
-pub mod api;
 pub mod app;
 pub mod auth;
 pub mod data;
@@ -73,7 +72,6 @@ async fn main() {
 fn init_router(state: AppState) -> Router {
     Router::new()
         .merge(app::init_router())
-        .nest("/api", api::init_router())
         .nest("/auth", auth::init_router())
         .nest_service("/assets", ServeDir::new("assets"))
         .nest_service("/favicon.ico", ServeFile::new("assets/favicon.ico"))

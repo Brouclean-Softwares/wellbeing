@@ -8,7 +8,7 @@
 
 {% if let Some(user) = profile.user %}
 <h2>
-    {{ profile.language.translate("welcome") }} {{ user.given_name }} ❤️
+    {{ welcome_user_translation }} ❤️
 </h2>
 
 {% else %}

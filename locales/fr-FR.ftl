@@ -12,3 +12,4 @@ user_not_found = Utilisateur introuvable
 user_profile = Profil
 
 welcome = Bienvenue
+welcome_name = Bienvenue { $name }

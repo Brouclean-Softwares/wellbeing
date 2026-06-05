@@ -1,5 +1,8 @@
 use axum::{extract::Request, middleware::Next, response::Response};
 use fluent_templates::Loader;
+use fluent_templates::fluent_bundle::FluentValue;
+use std::borrow::Cow;
+use std::collections::HashMap;
 use std::iter::Iterator;
 use unic_langid::{LanguageIdentifier, langid};
 
@@ -44,6 +47,14 @@ impl Language {
 
     pub fn translate(&self, text_id: &str) -> String {
         LOCALES.lookup(&self.0, text_id)
+    }
+
+    pub fn translate_with_args(
+        &self,
+        text_id: &str,
+        args: &HashMap<Cow<'static, str>, FluentValue>,
+    ) -> String {
+        LOCALES.lookup_with_args(&self.0, text_id, args)
     }
 
     pub fn accepted_languages() -> Vec<Self> {

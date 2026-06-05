@@ -8,7 +8,7 @@ use axum_extra::extract::PrivateCookieJar;
 use http::request::Parts;
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, sqlx::FromRow, Clone)]
+#[derive(Deserialize, Debug, sqlx::FromRow, Clone, Default)]
 pub struct User {
     pub id: Option<i64>,
     pub email: String,

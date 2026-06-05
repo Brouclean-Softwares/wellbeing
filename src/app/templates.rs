@@ -18,11 +18,12 @@ pub struct HomePage {
 impl HomePage {
     pub async fn get(app_state: &AppState, profile: &Profile) -> Self {
         let welcome_user_translation = profile.language.translate_with_args(
-                "welcome_name",
-                &HashMap::from([
-                    (Cow::from("name"), profile.user.clone().unwrap_or_default().given_name.into())
-                ]),
-            );
+            "welcome_name",
+            &HashMap::from([(
+                Cow::from("name"),
+                profile.user.clone().unwrap_or_default().given_name.into(),
+            )]),
+        );
 
         Self {
             navigation_bar: NavigationBar::get(app_state, &profile),

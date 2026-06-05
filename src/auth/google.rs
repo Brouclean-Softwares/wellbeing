@@ -49,14 +49,14 @@ pub async fn callback(
 
     let access_token = token.access_token().secret();
 
-    let profile = app_state
+    let google_user_info = app_state
         .http_requester
         .get("https://openidconnect.googleapis.com/v1/userinfo")
         .bearer_auth(access_token.to_owned())
         .send()
         .await?;
 
-    let profile = profile.json::<User>().await?;
+    let user = google_user_info.json::<User>().await?;
 
     let cookie = Cookie::build((SESSION_TOKEN, access_token.to_owned()))
         .same_site(SameSite::Lax)
@@ -64,11 +64,11 @@ pub async fn callback(
         .secure(true)
         .http_only(true);
 
-    profile.upsert(&app_state).await?;
+    user.upsert(&app_state).await?;
 
     Session::upsert(
         &app_state,
-        profile.email,
+        user.email,
         token.access_token().secret().to_owned(),
     )
     .await?;

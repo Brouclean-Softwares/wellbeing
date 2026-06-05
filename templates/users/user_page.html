@@ -6,7 +6,7 @@
 
 {% block body %}
 
-{% if let Some(user_profile) = profile %}
+{% if let Some(user_profile) = profile.user %}
 <div class="uk-grid-small uk-flex-middle" uk-grid>
     <div class="uk-width-auto">
         <img src="{{ user_profile.picture }}" class="uk-border-pill" width="75" height="75" alt="{{ user_profile.name }}">
@@ -29,7 +29,7 @@
 {% else %}
 
 <h2>
-    Utilisateur introuvable
+    {{ profile.language.translate("user_not_found") }}
 </h2>
 {% endif %}
 

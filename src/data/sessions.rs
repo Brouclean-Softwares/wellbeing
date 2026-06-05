@@ -49,11 +49,7 @@ impl Session {
         Ok(())
     }
 
-    pub async fn delete_expired(
-        state: &AppState,
-        user_id: &i64,
-        token: &String,
-    ) -> Result<(), AppError> {
+    pub async fn delete_expired(state: &AppState, user_id: &i64) -> Result<(), AppError> {
         tracing::debug!("delete_expired for user_id={}", user_id);
 
         sqlx::query(

@@ -17,7 +17,6 @@ pub enum AppError {
     ParseDateError(#[from] chrono::format::ParseError),
     JsonError(#[from] serde_json::Error),
     FromRequestPartsError(#[from] std::convert::Infallible),
-    BloodBowlAppError(String),
 }
 
 impl IntoResponse for AppError {
@@ -35,7 +34,6 @@ impl IntoResponse for AppError {
             Self::ParseDateError(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
             Self::JsonError(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
             Self::FromRequestPartsError(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
-            Self::BloodBowlAppError(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
         };
 
         response.into_response()
@@ -45,33 +43,16 @@ impl IntoResponse for AppError {
 impl Display for AppError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            AppError::SQL(error) => write!(f, "Oups! Souci avec la base de données : {}", error),
-            AppError::Request(error) => {
-                write!(f, "Oups! Souci avec les appels internets : {}", error)
-            }
-            AppError::TokenError(error) => write!(f, "Oups! Souci de connexion : {}", error),
-            AppError::Unauthorized => write!(f, "Pas le droit d'accéder à ce contenu"),
-            AppError::OptionError => write!(f, "Oups! Souci avec une valeur inexistante"),
-            AppError::ParseIntError(error) => write!(
-                f,
-                "Oups! Souci lors d'une conversion de données : {}",
-                error
-            ),
-            AppError::ParseDateError(error) => {
-                write!(f, "Oups! Souci lors d'une conversion de dates : {}", error)
-            }
-            AppError::JsonError(error) => write!(
-                f,
-                "Oups! Souci lors d'une conversion de données en Json : {}",
-                error
-            ),
-            AppError::FromRequestPartsError(error) => write!(
-                f,
-                "Oups! Souci lors du déchiffrage de la requète web : {}",
-                error
-            ),
-            AppError::BloodBowlAppError(error) => {
-                write!(f, "Règles de blood bowl non respectées : {}", error)
+            AppError::SQL(error) => write!(f, "SQL error : {}", error),
+            AppError::Request(error) => write!(f, "Request error : {}", error),
+            AppError::TokenError(error) => write!(f, "Token error : {}", error),
+            AppError::Unauthorized => write!(f, "Unauthorized"),
+            AppError::OptionError => write!(f, "OptionError"),
+            AppError::ParseIntError(error) => write!(f, "ParseIntError : {}", error),
+            AppError::ParseDateError(error) => write!(f, "ParseDateError : {}", error),
+            AppError::JsonError(error) => write!(f, "JsonError : {}", error),
+            AppError::FromRequestPartsError(error) => {
+                write!(f, "FromRequestPartsError : {}", error)
             }
         }
     }
@@ -80,7 +61,6 @@ impl Display for AppError {
 impl AppError {
     pub fn log_and_redirect(&self, redirect: Redirect) -> Redirect {
         tracing::error!("{}", self);
-
         redirect
     }
 }

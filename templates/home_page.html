@@ -6,9 +6,9 @@
 
 {% block body %}
 
-{% if let Some(user) = profile %}
+{% if let Some(user) = profile.user %}
 <h2>
-    Bienvenue {{ user.given_name }} ❤️
+    {{ profile.language.translate("welcome") }} {{ user.given_name }} ❤️
 </h2>
 
 {% else %}

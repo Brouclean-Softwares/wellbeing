@@ -1,5 +1,5 @@
 use crate::AppState;
-use crate::data::users::User;
+use crate::data::users::Profile;
 use askama::Template;
 use askama_web::WebTemplate;
 
@@ -9,14 +9,14 @@ pub mod users;
 #[template(path = "home_page.html")]
 pub struct HomePage {
     navigation_bar: NavigationBar,
-    profile: Option<User>,
+    profile: Profile,
 }
 
 impl HomePage {
-    pub async fn get(app_state: AppState, profile: Option<User>) -> Self {
+    pub async fn get(app_state: &AppState, profile: &Profile) -> Self {
         Self {
-            navigation_bar: NavigationBar::get(&app_state, &profile),
-            profile,
+            navigation_bar: NavigationBar::get(app_state, &profile),
+            profile: profile.clone(),
         }
     }
 }
@@ -24,13 +24,13 @@ impl HomePage {
 #[derive(Template, WebTemplate)]
 #[template(path = "navigation_bar.html")]
 pub struct NavigationBar {
-    profile: Option<User>,
+    profile: Profile,
     is_admin: bool,
 }
 
 impl NavigationBar {
-    pub fn get(app_state: &AppState, profile: &Option<User>) -> Self {
-        let is_admin = match profile {
+    pub fn get(app_state: &AppState, profile: &Profile) -> Self {
+        let is_admin = match &profile.user {
             Some(user) => user.is_admin(app_state),
             _ => false,
         };

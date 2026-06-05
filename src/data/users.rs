@@ -2,6 +2,7 @@ use crate::AppState;
 use crate::auth::SESSION_TOKEN;
 use crate::data::sessions::Session;
 use crate::errors::AppError;
+use crate::languages::Language;
 use axum::extract::{FromRef, FromRequestParts};
 use axum_extra::extract::PrivateCookieJar;
 use http::request::Parts;
@@ -25,9 +26,9 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let MayBeUser(profile) = MayBeUser::from_request_parts(parts, state).await?;
+        let profile = Profile::from_request_parts(parts, state).await?;
 
-        profile.ok_or(AppError::Unauthorized)
+        profile.user.ok_or(AppError::Unauthorized)
     }
 }
 
@@ -41,7 +42,29 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let profile = Profile::from_request_parts(parts, state).await?;
+
+        Ok(MayBeUser(profile.user))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Profile {
+    pub user: Option<User>,
+    pub language: Language,
+}
+
+impl<S> FromRequestParts<S> for Profile
+where
+    S: Send + Sync,
+    AppState: FromRef<S>,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = AppState::from_ref(state);
+
+        let language = parts.extensions.get::<Language>().cloned().unwrap();
 
         let cookie_jar: PrivateCookieJar<AppState> =
             PrivateCookieJar::from_request_parts(parts, &state).await?;
@@ -56,9 +79,12 @@ where
                     .await?;
             }
 
-            Ok(MayBeUser(user))
+            Ok(Profile { user, language })
         } else {
-            Ok(MayBeUser(None))
+            Ok(Profile {
+                user: None,
+                language,
+            })
         }
     }
 }
@@ -124,7 +150,7 @@ impl User {
         token: &String,
     ) -> Result<(), AppError> {
         Session::extend(state, &self.id.unwrap_or_default(), token).await?;
-        Session::delete_expired(state, &self.id.unwrap_or_default(), token).await
+        Session::delete_expired(state, &self.id.unwrap_or_default()).await
     }
 
     pub async fn select_by_id(state: &AppState, id: Option<i64>) -> Result<Option<Self>, AppError> {

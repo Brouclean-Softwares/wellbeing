@@ -9,7 +9,7 @@
             </div>
 
             <div class="uk-navbar-right">
-            {% if let Some(user_profile) = profile %}
+                {% if let Some(user_profile) = profile.user %}
                 <div class="uk-navbar-item">
                     <img class="uk-border-pill" src="{{ user_profile.picture }}" width="50" height="50" alt="{{ user_profile.name }}">
                     <div class="uk-visible@m">
@@ -27,17 +27,18 @@
                     <ul class="uk-nav uk-navbar-dropdown-nav">
                         <li>
                             <a href="/auth/profile">
-                                <span uk-icon="icon: user"></span>Profil
+                                <span uk-icon="icon: user"></span>{{ profile.language.translate("user_profile") }}
                             </a>
                         </li>
                         <li>
                             <a href="/auth/sign_out">
-                                <span uk-icon="icon: sign-out"></span>Se déconnecter
+                                <span uk-icon="icon: sign-out"></span>{{ profile.language.translate("sign-out") }}
                             </a>
                         </li>
                     </ul>
                 </div>
-            {% else %}
+
+                {% else %}
                 <form action="/auth/sign_in" method="post"
                       onsubmit="this.redirection_uri.value = window.location.pathname + window.location.search;">
 
@@ -45,10 +46,10 @@
 
                     <button class="uk-button uk-button-link" type="submit">
                         <span  uk-icon="icon: sign-in"></span>
-                        <span class="uk-visible@m">Se connecter</span>
+                        <span class="uk-visible@m">{{ profile.language.translate("sign-in") }}</span>
                     </button>
                 </form>
-            {% endif %}
+                {% endif %}
             </div>
 
         </div>

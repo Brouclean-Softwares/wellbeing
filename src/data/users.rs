@@ -1,5 +1,6 @@
 use crate::AppState;
 use crate::auth::SESSION_TOKEN;
+use crate::data::sessions::Session;
 use crate::errors::AppError;
 use axum::extract::{FromRef, FromRequestParts};
 use axum_extra::extract::PrivateCookieJar;
@@ -45,13 +46,14 @@ where
         let cookie_jar: PrivateCookieJar<AppState> =
             PrivateCookieJar::from_request_parts(parts, &state).await?;
 
-        let cookie = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
+        let token = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
 
-        if let Some(cookie) = cookie {
-            let user = User::select_connected_user(&state, &cookie).await?;
+        if let Some(token) = token {
+            let user = User::select_connected_user(&state, &token).await?;
 
             if let Some(user) = &user {
-                user.extend_session(&state, &cookie).await?;
+                user.extend_session_and_delete_expired(&state, &token)
+                    .await?;
             }
 
             Ok(MayBeUser(user))
@@ -91,9 +93,9 @@ impl User {
 
     pub async fn select_connected_user(
         state: &AppState,
-        cookie: &String,
+        token: &String,
     ) -> Result<Option<Self>, AppError> {
-        tracing::debug!("select_connected_user with token={}", cookie);
+        tracing::debug!("select_connected_user with token={}", token);
 
         let connected_user: Option<User> = sqlx::query_as(
             "SELECT users.id,
@@ -109,29 +111,20 @@ impl User {
                 AND sessions.expires_at > CURRENT_TIMESTAMP
                 LIMIT 1",
         )
-        .bind(cookie.clone())
+        .bind(token.clone())
         .fetch_optional(&state.db)
         .await?;
 
         Ok(connected_user)
     }
 
-    async fn extend_session(&self, state: &AppState, cookie: &String) -> Result<(), AppError> {
-        tracing::debug!("extend_session for user_id={}", self.id.unwrap_or_default());
-
-        sqlx::query(
-            "UPDATE sessions
-                SET expires_at = CURRENT_TIMESTAMP + interval '4 hours'
-                WHERE token = $1
-                AND user_id = $2
-                AND expires_at > CURRENT_TIMESTAMP",
-        )
-        .bind(cookie.clone())
-        .bind(self.id)
-        .execute(&state.db)
-        .await?;
-
-        Ok(())
+    async fn extend_session_and_delete_expired(
+        &self,
+        state: &AppState,
+        token: &String,
+    ) -> Result<(), AppError> {
+        Session::extend(state, &self.id.unwrap_or_default(), token).await?;
+        Session::delete_expired(state, &self.id.unwrap_or_default(), token).await
     }
 
     pub async fn select_by_id(state: &AppState, id: Option<i64>) -> Result<Option<Self>, AppError> {

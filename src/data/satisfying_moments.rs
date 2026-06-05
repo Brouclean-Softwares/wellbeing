@@ -12,6 +12,7 @@ pub struct SatisfyingMoments {
     pub why_it_matters: Option<String>,
     pub values_alignment: Option<String>,
     pub lived_at: NaiveDate,
+    pub satisfaction_level: Option<i16>,
 }
 
 impl SatisfyingMoments {
@@ -28,7 +29,8 @@ impl SatisfyingMoments {
                         thoughts,
                         why_it_matters,
                         values_alignment,
-                        lived_at
+                        lived_at,
+                        satisfaction_level
                 FROM satisfying_moments
                 WHERE user_id = $1",
         )

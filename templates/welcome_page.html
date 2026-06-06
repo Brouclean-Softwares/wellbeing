@@ -1,0 +1,19 @@
+{% extends "page_base.html" %}
+
+{% block navbar %}
+{{ navigation_bar|escape("none") }}
+{% endblock %}
+
+{% block body %}
+<h2>
+    {{ profile.translate("welcome") }}
+</h2>
+
+<p>
+    {{ profile.translate("application_goal") }}
+</p>
+
+<p>
+    {% include "google_button.html" %}
+</p>
+{% endblock %}

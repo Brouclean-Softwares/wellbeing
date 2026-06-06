@@ -1,16 +1,160 @@
 use crate::AppState;
 use crate::auth::SESSION_TOKEN;
 use crate::data::sessions::Session;
+use crate::dates::WithTimeZone;
 use crate::errors::AppError;
-use crate::languages::Language;
+use crate::languages::{Language, Translator};
 use axum::extract::{FromRef, FromRequestParts};
 use axum_extra::extract::PrivateCookieJar;
+use chrono::TimeZone;
+use chrono_tz::Tz;
 use http::request::Parts;
 use serde::Deserialize;
 
+pub struct MayBeUser(pub Option<User>);
+
+impl<S> FromRequestParts<S> for MayBeUser
+where
+    S: Send + Sync,
+    AppState: FromRef<S>,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let profile = Profile::from_request_parts(parts, state).await?;
+
+        Ok(MayBeUser(profile.user))
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct ConnectedProfile {
+    pub user: User,
+    pub language: Language,
+    pub timezone: Tz,
+}
+
+impl Translator for ConnectedProfile {
+    fn language(&self) -> Language {
+        self.language.clone()
+    }
+}
+
+impl WithTimeZone for ConnectedProfile {
+    fn timezone(&self) -> impl TimeZone {
+        self.timezone
+    }
+}
+
+impl TryFrom<Profile> for ConnectedProfile {
+    type Error = AppError;
+
+    fn try_from(profile: Profile) -> Result<Self, Self::Error> {
+        if let Some(user) = &profile.user {
+            Ok(Self {
+                user: user.clone(),
+                language: profile.language,
+                timezone: profile.timezone,
+            })
+        } else {
+            Err(AppError::Unauthorized)
+        }
+    }
+}
+
+impl<S> FromRequestParts<S> for ConnectedProfile
+where
+    S: Send + Sync,
+    AppState: FromRef<S>,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let profile = Profile::from_request_parts(parts, state).await?;
+
+        profile.try_into()
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Profile {
+    pub user: Option<User>,
+    pub language: Language,
+    pub timezone: Tz,
+}
+
+impl Translator for Profile {
+    fn language(&self) -> Language {
+        self.language.clone()
+    }
+}
+
+impl WithTimeZone for Profile {
+    fn timezone(&self) -> impl TimeZone {
+        self.timezone
+    }
+}
+
+impl From<ConnectedProfile> for Profile {
+    fn from(connected_profile: ConnectedProfile) -> Self {
+        Self {
+            user: Some(connected_profile.user),
+            language: connected_profile.language,
+            timezone: connected_profile.timezone,
+        }
+    }
+}
+
+impl<S> FromRequestParts<S> for Profile
+where
+    S: Send + Sync,
+    AppState: FromRef<S>,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let state = AppState::from_ref(state);
+
+        let language = parts.extensions.get::<Language>().cloned().unwrap();
+
+        let timezone = parts
+            .headers
+            .get("X-Timezone")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.parse::<Tz>().ok())
+            .unwrap_or(chrono_tz::UTC);
+
+        let cookie_jar: PrivateCookieJar<AppState> =
+            PrivateCookieJar::from_request_parts(parts, &state).await?;
+
+        let token = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
+
+        if let Some(token) = token {
+            let user = User::select_connected_user(&state, &token).await?;
+
+            if let Some(user) = &user {
+                user.extend_session_and_delete_expired(&state, &token)
+                    .await?;
+            }
+
+            Ok(Profile {
+                user,
+                language,
+                timezone,
+            })
+        } else {
+            Ok(Profile {
+                user: None,
+                language,
+                timezone,
+            })
+        }
+    }
+}
+
 #[derive(Deserialize, Debug, sqlx::FromRow, Clone, Default)]
 pub struct User {
-    pub id: Option<i64>,
+    pub id: i64,
     pub email: String,
     pub name: String,
     pub given_name: String,
@@ -32,87 +176,7 @@ where
     }
 }
 
-pub struct MayBeUser(pub Option<User>);
-
-impl<S> FromRequestParts<S> for MayBeUser
-where
-    S: Send + Sync,
-    AppState: FromRef<S>,
-{
-    type Rejection = AppError;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let profile = Profile::from_request_parts(parts, state).await?;
-
-        Ok(MayBeUser(profile.user))
-    }
-}
-
-#[derive(Debug, Clone)]
-pub struct Profile {
-    pub user: Option<User>,
-    pub language: Language,
-}
-
-impl<S> FromRequestParts<S> for Profile
-where
-    S: Send + Sync,
-    AppState: FromRef<S>,
-{
-    type Rejection = AppError;
-
-    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let state = AppState::from_ref(state);
-
-        let language = parts.extensions.get::<Language>().cloned().unwrap();
-
-        let cookie_jar: PrivateCookieJar<AppState> =
-            PrivateCookieJar::from_request_parts(parts, &state).await?;
-
-        let token = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
-
-        if let Some(token) = token {
-            let user = User::select_connected_user(&state, &token).await?;
-
-            if let Some(user) = &user {
-                user.extend_session_and_delete_expired(&state, &token)
-                    .await?;
-            }
-
-            Ok(Profile { user, language })
-        } else {
-            Ok(Profile {
-                user: None,
-                language,
-            })
-        }
-    }
-}
-
 impl User {
-    pub fn optional_user_eq_other(optional_user: &Option<User>, other: &Option<User>) -> bool {
-        if let Some(other) = other {
-            Self::optional_user_has_optional_id(optional_user, &other.id)
-        } else {
-            false
-        }
-    }
-
-    pub fn optional_user_has_optional_id(
-        optional_user: &Option<User>,
-        optional_id: &Option<i64>,
-    ) -> bool {
-        if let (Some(user), Some(id)) = (optional_user, optional_id) {
-            if let Some(user_id) = user.id {
-                user_id.eq(id)
-            } else {
-                false
-            }
-        } else {
-            false
-        }
-    }
-
     pub fn is_admin(&self, state: &AppState) -> bool {
         state.admin_email.eq(&self.email)
     }
@@ -149,8 +213,8 @@ impl User {
         state: &AppState,
         token: &String,
     ) -> Result<(), AppError> {
-        Session::extend(state, &self.id.unwrap_or_default(), token).await?;
-        Session::delete_expired(state, &self.id.unwrap_or_default()).await
+        Session::extend(state, &self.id, token).await?;
+        Session::delete_expired(state, &self.id).await
     }
 
     pub async fn select_by_id(state: &AppState, id: Option<i64>) -> Result<Option<Self>, AppError> {
@@ -197,69 +261,5 @@ impl User {
         .await?;
 
         Ok(user)
-    }
-
-    pub async fn upsert(&self, state: &AppState) -> Result<Self, AppError> {
-        tracing::debug!("upsert for id={}", self.id.unwrap_or_default());
-
-        let existing_user = Self::select_by_mail(state, &self.email).await?;
-
-        if let Some(user_id) = existing_user.and_then(|user| user.id) {
-            let updated_user: User = sqlx::query_as(
-                "UPDATE users
-                    SET name = $2,
-                        given_name = $3,
-                        family_name = $4,
-                        picture = $5,
-                        last_updated = CURRENT_TIMESTAMP
-                    WHERE id = $1
-                    RETURNING users.id, users.email, users.name, given_name, family_name, users.picture",
-            )
-                .bind(user_id.clone())
-                .bind(self.name.clone())
-                .bind(self.given_name.clone())
-                .bind(self.family_name.clone())
-                .bind(self.picture.clone())
-                .fetch_one(&state.db)
-                .await?;
-
-            Ok(updated_user)
-        } else {
-            let inserted_user: User = sqlx::query_as(
-                "INSERT INTO users (email, name, given_name, family_name, picture)
-                VALUES ($1, $2, $3, $4, $5)
-                ON CONFLICT (email) DO NOTHING
-                RETURNING users.id, users.email, users.name, given_name, family_name, users.picture",
-            )
-                .bind(self.email.clone())
-                .bind(self.name.clone())
-                .bind(self.given_name.clone())
-                .bind(self.family_name.clone())
-                .bind(self.picture.clone())
-                .fetch_one(&state.db)
-                .await?;
-
-            Ok(inserted_user)
-        }
-    }
-}
-
-impl PartialEq<User> for User {
-    fn eq(&self, other: &User) -> bool {
-        if let (Some(id), Some(other_id)) = (self.id.clone(), other.id.clone()) {
-            id.eq(&other_id)
-        } else {
-            false
-        }
-    }
-}
-
-impl PartialEq<Option<User>> for User {
-    fn eq(&self, other: &Option<User>) -> bool {
-        if let Some(other_user) = other.clone() {
-            self.eq(&other_user)
-        } else {
-            false
-        }
     }
 }

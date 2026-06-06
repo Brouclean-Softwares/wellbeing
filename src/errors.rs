@@ -59,6 +59,10 @@ impl Display for AppError {
 }
 
 impl AppError {
+    pub fn log(&self) {
+        tracing::error!("{}", self);
+    }
+
     pub fn log_and_redirect(&self, redirect: Redirect) -> Redirect {
         tracing::error!("{}", self);
         redirect

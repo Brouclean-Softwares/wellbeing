@@ -1,7 +1,7 @@
 use crate::AppState;
 use crate::app::templates::users::UserPage;
 use crate::data::sessions::Session;
-use crate::data::users::{MayBeUser, Profile};
+use crate::data::users::{ConnectedProfile, MayBeUser};
 use axum::extract::State;
 use axum::routing::{get, post};
 use axum::{
@@ -25,8 +25,11 @@ pub fn init_router() -> Router<AppState> {
         .route("/google_callback", get(google::callback))
 }
 
-pub async fn profile(State(app_state): State<AppState>, profile: Profile) -> impl IntoResponse {
-    UserPage::from(&app_state, &profile).into_response()
+pub async fn profile(
+    State(app_state): State<AppState>,
+    profile: ConnectedProfile,
+) -> impl IntoResponse {
+    UserPage::get(&app_state, &profile).into_response()
 }
 
 #[derive(Deserialize)]

@@ -5,14 +5,13 @@
 {% endblock %}
 
 {% block body %}
-
-{% if let Some(user) = profile.user %}
 <h2>
     {{ welcome_user_translation }} ❤️
 </h2>
 
-{% else %}
-{% include "welcome.html" %}
-{% endif %}
-
+<div class="uk-margin-large-top"
+     hx-get="/satisfying_moments/of_the_day"
+     hx-trigger="load"
+     hx-headers='js:{ "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone }'>
+</div>
 {% endblock %}

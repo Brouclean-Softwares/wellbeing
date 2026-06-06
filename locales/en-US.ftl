@@ -5,6 +5,10 @@ google_button_text = Continue with Google
 language = 🇺🇸
 language_name = English
 
+none_yet_question = None yet ?
+
+satisfying_moments = Satisfying moments
+satisfying_moments_of_day = Satisfying moments of the day
 sign-in = Sign-in
 sign-out = Sign-out
 

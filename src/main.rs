@@ -12,6 +12,7 @@ use tracing::Level;
 pub mod app;
 pub mod auth;
 pub mod data;
+pub mod dates;
 pub mod errors;
 pub mod languages;
 

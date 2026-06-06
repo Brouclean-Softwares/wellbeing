@@ -1,3 +1,4 @@
+use crate::dates::WithTimeZone;
 use axum::{extract::Request, middleware::Next, response::Response};
 use fluent_templates::Loader;
 use fluent_templates::fluent_bundle::FluentValue;
@@ -45,18 +46,6 @@ impl Language {
         Self(LOCALES.fallback().clone())
     }
 
-    pub fn translate(&self, text_id: &str) -> String {
-        LOCALES.lookup(&self.0, text_id)
-    }
-
-    pub fn translate_with_args(
-        &self,
-        text_id: &str,
-        args: &HashMap<Cow<'static, str>, FluentValue>,
-    ) -> String {
-        LOCALES.lookup_with_args(&self.0, text_id, args)
-    }
-
     pub fn accepted_languages() -> Vec<Self> {
         LOCALES
             .locales()
@@ -82,5 +71,21 @@ impl Language {
             .insert(preferred_lang);
 
         Ok(next.run(request_with_preferred_lang).await)
+    }
+}
+
+pub trait Translator: WithTimeZone {
+    fn language(&self) -> Language;
+
+    fn translate(&self, text_id: &str) -> String {
+        LOCALES.lookup(&self.language().0, text_id)
+    }
+
+    fn translate_with_args(
+        &self,
+        text_id: &str,
+        args: &HashMap<Cow<'static, str>, FluentValue>,
+    ) -> String {
+        LOCALES.lookup_with_args(&self.language().0, text_id, args)
     }
 }

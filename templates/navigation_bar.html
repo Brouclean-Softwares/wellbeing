@@ -9,30 +9,30 @@
             </div>
 
             <div class="uk-navbar-right">
-                {% if let Some(user_profile) = profile.user %}
+                {% if let Some(user) = profile.user %}
                 <div class="uk-navbar-item">
-                    <img class="uk-border-pill" src="{{ user_profile.picture }}" width="50" height="50" alt="{{ user_profile.name }}">
+                    <img class="uk-border-pill" src="{{ user.picture }}" width="35" height="35" alt="{{ user.name }}">
                     <div class="uk-visible@m">
                         <span class="uk-text-emphasis">
-                            {% if is_admin %}
+                            {% if user_is_admin %}
                                 (Administrateur)
                             {% else %}
-                                {{ user_profile.name }}
+                                {{ user.name }}
                             {% endif %}
                         </span>
-                        <br>{{ user_profile.email }}
+                        <br>{{ user.email }}
                     </div>
                 </div>
                 <div class="uk-navbar-dropdown">
                     <ul class="uk-nav uk-navbar-dropdown-nav">
                         <li>
                             <a href="/auth/profile">
-                                <span uk-icon="icon: user"></span>{{ profile.language.translate("user_profile") }}
+                                <span uk-icon="icon: user"></span>{{ profile.translate("user_profile") }}
                             </a>
                         </li>
                         <li>
                             <a href="/auth/sign_out">
-                                <span uk-icon="icon: sign-out"></span>{{ profile.language.translate("sign-out") }}
+                                <span uk-icon="icon: sign-out"></span>{{ profile.translate("sign-out") }}
                             </a>
                         </li>
                     </ul>
@@ -46,7 +46,7 @@
 
                     <button class="uk-button uk-button-link" type="submit">
                         <span  uk-icon="icon: sign-in"></span>
-                        <span class="uk-visible@m">{{ profile.language.translate("sign-in") }}</span>
+                        <span class="uk-visible@m">{{ profile.translate("sign-in") }}</span>
                     </button>
                 </form>
                 {% endif %}

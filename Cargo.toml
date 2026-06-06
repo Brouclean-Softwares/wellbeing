@@ -9,6 +9,7 @@ askama = "0.16"
 askama_web = { version = "0.16", features = ["axum-0.8"] }
 axum = { version = "0.8", features = ["multipart", "macros", "query"] }
 axum-extra = { version = "0.12", features = ["cookie-private"] }
+chrono-tz = "0.10"
 chrono = { version = "0.4", features = ["clock"] }
 dotenv = "0.15"
 fluent-templates = "0.14"

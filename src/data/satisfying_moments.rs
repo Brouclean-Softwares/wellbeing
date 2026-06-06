@@ -4,7 +4,7 @@ use chrono::NaiveDate;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug, sqlx::FromRow, Clone)]
-pub struct SatisfyingMoments {
+pub struct SatisfyingMoment {
     pub id: i64,
     pub user_id: i64,
     pub description: String,
@@ -15,14 +15,19 @@ pub struct SatisfyingMoments {
     pub satisfaction_level: Option<i16>,
 }
 
-impl SatisfyingMoments {
-    pub async fn select_all_for_user(
+impl SatisfyingMoment {
+    pub async fn select_lived_at_for_user(
         state: &AppState,
+        lived_at: &NaiveDate,
         user_id: &i64,
     ) -> Result<Vec<Self>, AppError> {
-        tracing::debug!("select_all_for_user with user_id={}", user_id);
+        tracing::debug!(
+            "select_lived_at_for_user at {} with user_id={}",
+            lived_at,
+            user_id
+        );
 
-        let satisfying_moments: Vec<SatisfyingMoments> = sqlx::query_as(
+        let satisfying_moments: Vec<SatisfyingMoment> = sqlx::query_as(
             "SELECT id,
                         user_id,
                         description,
@@ -32,8 +37,10 @@ impl SatisfyingMoments {
                         lived_at,
                         satisfaction_level
                 FROM satisfying_moments
-                WHERE user_id = $1",
+                WHERE lived_at = $1
+                AND user_id = $2",
         )
+        .bind(lived_at.clone())
         .bind(user_id.clone())
         .fetch_all(&state.db)
         .await?;

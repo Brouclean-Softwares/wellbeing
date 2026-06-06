@@ -23,6 +23,61 @@ pub struct AuthRequest {
     code: String,
 }
 
+#[derive(Deserialize, Debug, sqlx::FromRow, Clone, Default)]
+pub struct GoogleUserInfo {
+    pub email: String,
+    pub name: String,
+    pub given_name: String,
+    pub family_name: String,
+    pub picture: String,
+}
+
+impl GoogleUserInfo {
+    pub async fn upsert(&self, state: &AppState) -> Result<User, AppError> {
+        tracing::debug!("upsert for email={}", self.email);
+
+        let existing_user = User::select_by_mail(state, &self.email).await?;
+
+        if let Some(user) = existing_user {
+            let updated_user: User = sqlx::query_as(
+                "UPDATE users
+                    SET name = $2,
+                        given_name = $3,
+                        family_name = $4,
+                        picture = $5,
+                        last_updated = CURRENT_TIMESTAMP
+                    WHERE id = $1
+                    RETURNING users.id, users.email, users.name, given_name, family_name, users.picture",
+            )
+                .bind(user.id.clone())
+                .bind(self.name.clone())
+                .bind(self.given_name.clone())
+                .bind(self.family_name.clone())
+                .bind(self.picture.clone())
+                .fetch_one(&state.db)
+                .await?;
+
+            Ok(updated_user)
+        } else {
+            let inserted_user: User = sqlx::query_as(
+                "INSERT INTO users (email, name, given_name, family_name, picture)
+                VALUES ($1, $2, $3, $4, $5)
+                ON CONFLICT (email) DO NOTHING
+                RETURNING users.id, users.email, users.name, given_name, family_name, users.picture",
+            )
+                .bind(self.email.clone())
+                .bind(self.name.clone())
+                .bind(self.given_name.clone())
+                .bind(self.family_name.clone())
+                .bind(self.picture.clone())
+                .fetch_one(&state.db)
+                .await?;
+
+            Ok(inserted_user)
+        }
+    }
+}
+
 pub type GoogleOAuthClient = Client<
     BasicErrorResponse,
     BasicTokenResponse,
@@ -56,7 +111,7 @@ pub async fn callback(
         .send()
         .await?;
 
-    let user = google_user_info.json::<User>().await?;
+    let user = google_user_info.json::<GoogleUserInfo>().await?;
 
     let cookie = Cookie::build((SESSION_TOKEN, access_token.to_owned()))
         .same_site(SameSite::Lax)

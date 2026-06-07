@@ -1,0 +1,25 @@
+{% extends "page_base.html" %}
+
+{% block navbar %}
+{{ navigation_bar|escape("none") }}
+{% endblock %}
+
+{% block body %}
+<div id="welcome-screen" class="uk-text-center">
+    <h2>{{ welcome_user_with_love }}</h2>
+</div>
+
+<script>
+    setTimeout(() => {
+        const el = document.getElementById("welcome-screen");
+
+        el.style.transition = "opacity 0.5s ease";
+        el.style.opacity = "0";
+
+        setTimeout(() => {
+            window.location.href = "/";
+        }, 500);
+
+    }, 1500);
+</script>
+{% endblock %}

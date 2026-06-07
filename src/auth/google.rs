@@ -128,16 +128,19 @@ pub async fn callback(
     )
     .await?;
 
+    let normal_redirect = "/welcome_user_with_love".to_string();
+
     let redirect_uri = jar
         .get(REDIRECT_URI_AFTER_AUTH)
-        .map(|c| c.value().to_string())
-        .unwrap_or("/".to_string());
-
-    let redirect_uri = if redirect_uri.starts_with('/') {
-        redirect_uri
-    } else {
-        "/".into()
-    };
+        .map(|c| {
+            let redirect_uri = c.value().to_owned();
+            if redirect_uri.starts_with('/') && redirect_uri.len() > 1 {
+                redirect_uri
+            } else {
+                normal_redirect.clone()
+            }
+        })
+        .unwrap_or(normal_redirect);
 
     let jar = jar.remove(Cookie::from(REDIRECT_URI_AFTER_AUTH));
 

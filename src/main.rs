@@ -72,7 +72,7 @@ async fn main() {
 
 fn init_router(state: AppState) -> Router {
     Router::new()
-        .merge(app::init_router())
+        .merge(app::handlers::init_router())
         .nest("/auth", auth::init_router())
         .nest_service("/assets", ServeDir::new("assets"))
         .nest_service("/favicon.ico", ServeFile::new("assets/favicon.ico"))
@@ -84,7 +84,7 @@ fn init_router(state: AppState) -> Router {
         .with_state(state)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct AppState {
     db: PgPool,
     http_requester: Client,

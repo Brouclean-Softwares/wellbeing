@@ -1,4 +1,3 @@
-use crate::AppState;
 use crate::data::users::{ConnectedProfile, Profile};
 use crate::languages::Translator;
 use askama::Template;
@@ -6,7 +5,9 @@ use askama_web::WebTemplate;
 use std::borrow::Cow;
 use std::collections::HashMap;
 
+pub mod journal;
 pub mod satisfying_moments;
+pub mod shared;
 pub mod users;
 
 #[derive(Template, WebTemplate)]
@@ -16,26 +17,26 @@ pub struct WelcomePage {
     profile: Profile,
 }
 
-impl WelcomePage {
-    pub fn get(app_state: &AppState, profile: &Profile) -> Self {
+impl From<Profile> for WelcomePage {
+    fn from(profile: Profile) -> Self {
         Self {
-            navigation_bar: NavigationBar::get_from_profile(app_state, &profile),
-            profile: profile.clone(),
+            navigation_bar: NavigationBar::from(profile.clone()),
+            profile,
         }
     }
 }
 
 #[derive(Template, WebTemplate)]
-#[template(path = "home_page.html")]
-pub struct HomePage {
+#[template(path = "welcome_with_love_page.html")]
+pub struct WelcomeWithLovePage {
     navigation_bar: NavigationBar,
-    welcome_user_translation: String,
+    welcome_user_with_love: String,
 }
 
-impl HomePage {
-    pub fn get(app_state: &AppState, connected_profile: &ConnectedProfile) -> Self {
-        let welcome_user_translation = connected_profile.translate_with_args(
-            "welcome_name",
+impl From<ConnectedProfile> for WelcomeWithLovePage {
+    fn from(connected_profile: ConnectedProfile) -> Self {
+        let welcome_user_with_love = connected_profile.translate_with_args(
+            "welcome_name_with_love",
             &HashMap::from([(
                 Cow::from("name"),
                 connected_profile.user.clone().given_name.into(),
@@ -43,11 +44,10 @@ impl HomePage {
         );
 
         Self {
-            navigation_bar: NavigationBar::get_from_connected_profile(
-                app_state,
-                &connected_profile,
-            ),
-            welcome_user_translation,
+            navigation_bar: NavigationBar {
+                profile: connected_profile.into(),
+            },
+            welcome_user_with_love,
         }
     }
 }
@@ -56,25 +56,32 @@ impl HomePage {
 #[template(path = "navigation_bar.html")]
 pub struct NavigationBar {
     profile: Profile,
-    user_is_admin: bool,
 }
 
-impl NavigationBar {
-    pub fn get_from_profile(app_state: &AppState, profile: &Profile) -> Self {
-        let user_is_admin = match &profile.user {
-            Some(user) => user.is_admin(app_state),
-            _ => false,
-        };
-
-        Self {
-            profile: profile.clone(),
-            user_is_admin,
-        }
+impl From<Profile> for NavigationBar {
+    fn from(profile: Profile) -> Self {
+        Self { profile }
     }
-    pub fn get_from_connected_profile(
-        app_state: &AppState,
-        connected_profile: &ConnectedProfile,
-    ) -> Self {
-        Self::get_from_profile(app_state, &Profile::from(connected_profile.clone()))
+}
+
+impl From<ConnectedProfile> for NavigationBar {
+    fn from(connected_profile: ConnectedProfile) -> Self {
+        Self::from(Profile::from(connected_profile))
+    }
+}
+
+#[derive(Template, WebTemplate)]
+#[template(path = "unauthorized_page.html")]
+pub struct UnauthorizedPage {
+    navigation_bar: NavigationBar,
+    profile: Profile,
+}
+
+impl From<Profile> for UnauthorizedPage {
+    fn from(profile: Profile) -> Self {
+        Self {
+            navigation_bar: NavigationBar::from(profile.clone()),
+            profile,
+        }
     }
 }

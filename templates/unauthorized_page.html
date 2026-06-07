@@ -6,14 +6,10 @@
 
 {% block body %}
 <h2>
-    {{ profile.translate("welcome") }}
+    {{ profile.translate("unauthorized") }}
 </h2>
 
 <p>
-    {{ profile.translate("application_goal") }}
-</p>
-
-<p>
-    {% include "./auth/google_button.html" %}
+    {{ profile.translate("unauthorized_description") }}
 </p>
 {% endblock %}

@@ -12,7 +12,7 @@
     
     <div class="uk-width-expand">
         <h2 class="uk-margin-remove-bottom">
-            {% if is_admin %}
+            {% if connected_profile.is_admin %}
                 (Administrateur)
             {% else %}
                 {{ connected_profile.user.name }}

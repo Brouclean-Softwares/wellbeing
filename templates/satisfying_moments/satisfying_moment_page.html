@@ -1,0 +1,183 @@
+{% extends "page_base.html" %}
+
+{% block navbar %}
+{{ navigation_bar|escape("none") }}
+{% endblock %}
+
+{% block body %}
+
+{% if edit_mode %}
+
+<h2>
+    {{ connected_profile.translate("satisfying_moment") }}
+</h2>
+
+<form action="/satisfying_moments/moment" method="post" autocomplete="off" class="uk-form-stacked">
+    <input type="hidden" name="id" value="{{ satisfying_moment.id }}">
+    <input type="hidden" name="user_id" value="{{ satisfying_moment.user_id }}">
+
+    <div>
+        <label class="uk-form-label" for="title">
+            {{ connected_profile.translate("what_title") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <input class="uk-input"
+                   id="title"
+                   name="title"
+                   type="text"
+                   value="{{ satisfying_moment.title }}"
+                   required
+                   autofocus>
+        </div>
+    </div>
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="satisfaction_level">
+            {{ connected_profile.translate("what_satisfaction_level") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <input class="uk-range"
+                   id="satisfaction_level"
+                   name="satisfaction_level"
+                   type="range"
+                   min="0" max="10" step="1"
+                   value="{{ satisfying_moment.satisfaction_level.unwrap_or(5) }}">
+        </div>
+    </div>
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="lived_at">
+            {{ connected_profile.translate("what_day") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <input class="uk-input"
+                   id="lived_at"
+                   name="lived_at"
+                   type="date"
+                   value="{{ satisfying_moment.lived_at }}"
+                   required>
+        </div>
+    </div>
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="description">
+            {{ connected_profile.translate("what_description") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <textarea class="uk-textarea"
+                      id="description"
+                      name="description"
+                      rows="5"
+                      required>{{ satisfying_moment.description }}</textarea>
+        </div>
+    </div>
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="thoughts">
+            {{ connected_profile.translate("what_thoughts") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <textarea class="uk-textarea"
+                      id="thoughts"
+                      name="thoughts"
+                      rows="5">{{ satisfying_moment.thoughts }}</textarea>
+        </div>
+    </div>
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="why_it_matters">
+            {{ connected_profile.translate("why_it_matters") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <textarea class="uk-textarea"
+                      id="why_it_matters"
+                      name="why_it_matters"
+                      rows="5">{{ satisfying_moment.why_it_matters }}</textarea>
+        </div>
+    </div>
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="values_alignment">
+            {{ connected_profile.translate("what_values_alignment") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <textarea class="uk-textarea"
+                      id="values_alignment"
+                      name="values_alignment"
+                      rows="5">{{ satisfying_moment.values_alignment }}</textarea>
+        </div>
+    </div>
+
+    <div class="uk-margin-medium-top">
+        <a class="uk-button uk-button-default uk-margin-right"
+           uk-icon="close"
+           href="moment?id={{ satisfying_moment.id }}&edit_mode=false">
+            {{ connected_profile.translate("cancel") }}
+        </a>
+
+        <button class="uk-button uk-button-primary" uk-icon="pencil" type="submit">
+            {{ connected_profile.translate("update") }}
+        </button>
+    </div>
+</form>
+
+{% else %}
+
+<h2 class="uk-margin-remove-bottom">
+    {{ satisfying_moment.title }}
+</h2>
+
+{% if let Some(satisfaction_level) = satisfying_moment. satisfaction_level %}
+<p class="uk-text-meta uk-margin-remove">
+    {% for _ in 0..satisfaction_level as usize %}⭐{% endfor %}
+</p>
+{% endif %}
+
+<p class="uk-text-meta uk-margin-remove-top">
+    <a class="uk-link-reset" href="/journal/of_day?day={{ satisfying_moment.lived_at }}">
+        {{ satisfying_moment.lived_at }}
+    </a>
+</p>
+
+<p>
+    {{ satisfying_moment.description }}
+</p>
+
+{% if satisfying_moment.thoughts.len() > 0 %}
+<p>
+    {{ satisfying_moment.thoughts }}
+</p>
+{% endif %}
+
+{% if satisfying_moment.why_it_matters.len() > 0 %}
+<p>
+    {{ satisfying_moment.why_it_matters }}
+</p>
+{% endif %}
+
+{% if satisfying_moment.values_alignment.len() > 0 %}
+<p>
+    {{ satisfying_moment.values_alignment }}
+</p>
+{% endif %}
+
+<div class="uk-margin-medium-top">
+    <a class="uk-button uk-button-primary uk-margin-right"
+       uk-icon="pencil"
+       href="moment?id={{ satisfying_moment.id }}&edit_mode=true">
+        {{ connected_profile.translate("update") }}
+    </a>
+
+    {{ delete_button|escape("none") }}
+</div>
+
+{% endif %}
+
+{% endblock %}

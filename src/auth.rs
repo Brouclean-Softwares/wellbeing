@@ -25,11 +25,8 @@ pub fn init_router() -> Router<AppState> {
         .route("/google_callback", get(google::callback))
 }
 
-pub async fn profile(
-    State(app_state): State<AppState>,
-    profile: ConnectedProfile,
-) -> impl IntoResponse {
-    UserPage::get(&app_state, &profile).into_response()
+pub async fn profile(profile: ConnectedProfile) -> impl IntoResponse {
+    UserPage::from(profile).into_response()
 }
 
 #[derive(Deserialize)]

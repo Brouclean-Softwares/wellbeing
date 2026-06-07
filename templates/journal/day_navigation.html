@@ -1,0 +1,23 @@
+<div class="uk-child-width-1-3" uk-grid>
+    <div class="uk-text-left uk-width-expand">
+        {% if let Some(previous_day) = previous_day %}
+        <h2>
+            <a uk-icon="arrow-left" href="/journal/of_day?day={{ previous_day }}"></a>
+        </h2>
+        {% endif %}
+    </div>
+
+    <div class="uk-text-center uk-width-max-content">
+        <h2>
+            {{ day }}
+        </h2>
+    </div>
+
+    <div class="uk-text-right uk-width-expand">
+        {% if let Some(next_day) = next_day %}
+        <h2>
+            <a uk-icon="arrow-right" href="/journal/of_day?day={{ next_day }}"></a>
+        </h2>
+        {% endif %}
+    </div>
+</div>

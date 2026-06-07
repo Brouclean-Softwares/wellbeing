@@ -1,3 +1,24 @@
 body, h1, h2, h3, h4, h5, h6 {
     font-family: "Lobster Two", sans-serif;
 }
+
+.uk-button {
+    text-transform: none !important;
+}
+
+.uk-button-primary {
+    background-color: #6be197 !important;
+    color: white !important;
+}
+
+.uk-button,
+.uk-card,
+.uk-card-hover,
+.uk-modal-dialog,
+.uk-modal-dialog-default {
+    border-radius: 15px !important;
+}
+
+.uk-navbar-nav > li > a.uk-active {
+    color: #6be197 !important;
+}

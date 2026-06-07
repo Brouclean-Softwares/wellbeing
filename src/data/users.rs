@@ -29,6 +29,7 @@ where
 
 #[derive(Debug, Clone)]
 pub struct ConnectedProfile {
+    pub is_admin: bool,
     pub user: User,
     pub language: Language,
     pub timezone: Tz,
@@ -52,12 +53,13 @@ impl TryFrom<Profile> for ConnectedProfile {
     fn try_from(profile: Profile) -> Result<Self, Self::Error> {
         if let Some(user) = &profile.user {
             Ok(Self {
+                is_admin: profile.is_admin,
                 user: user.clone(),
                 language: profile.language,
                 timezone: profile.timezone,
             })
         } else {
-            Err(AppError::Unauthorized)
+            Err(AppError::Unauthorized(profile))
         }
     }
 }
@@ -78,6 +80,7 @@ where
 
 #[derive(Debug, Clone)]
 pub struct Profile {
+    pub is_admin: bool,
     pub user: Option<User>,
     pub language: Language,
     pub timezone: Tz,
@@ -98,6 +101,7 @@ impl WithTimeZone for Profile {
 impl From<ConnectedProfile> for Profile {
     fn from(connected_profile: ConnectedProfile) -> Self {
         Self {
+            is_admin: connected_profile.is_admin,
             user: Some(connected_profile.user),
             language: connected_profile.language,
             timezone: connected_profile.timezone,
@@ -132,18 +136,24 @@ where
         if let Some(token) = token {
             let user = User::select_connected_user(&state, &token).await?;
 
+            let mut is_admin = false;
+
             if let Some(user) = &user {
+                is_admin = user.is_admin(&state);
+
                 user.extend_session_and_delete_expired(&state, &token)
                     .await?;
             }
 
             Ok(Profile {
+                is_admin,
                 user,
                 language,
                 timezone,
             })
         } else {
             Ok(Profile {
+                is_admin: false,
                 user: None,
                 language,
                 timezone,
@@ -172,7 +182,7 @@ where
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let profile = Profile::from_request_parts(parts, state).await?;
 
-        profile.user.ok_or(AppError::Unauthorized)
+        profile.user.clone().ok_or(AppError::Unauthorized(profile))
     }
 }
 

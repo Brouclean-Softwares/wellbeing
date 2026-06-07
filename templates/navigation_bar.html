@@ -14,7 +14,7 @@
                     <img class="uk-border-pill" src="{{ user.picture }}" width="35" height="35" alt="{{ user.name }}">
                     <div class="uk-visible@m">
                         <span class="uk-text-emphasis">
-                            {% if user_is_admin %}
+                            {% if profile.is_admin %}
                                 (Administrateur)
                             {% else %}
                                 {{ user.name }}

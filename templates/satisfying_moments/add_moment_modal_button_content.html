@@ -1,0 +1,30 @@
+<input type="hidden" name="day" value="{{ day }}">
+
+<div class="uk-margin">
+    <label class="uk-form-label" for="title">
+        {{ connected_profile.translate("what_title") }}
+    </label>
+
+    <div class="uk-form-controls">
+        <input class="uk-input"
+               id="title"
+               name="title"
+               type="text"
+               required
+               autofocus>
+    </div>
+</div>
+
+<div class="uk-margin">
+    <label class="uk-form-label" for="description">
+        {{ connected_profile.translate("what_description") }}
+    </label>
+
+    <div class="uk-form-controls">
+        <textarea class="uk-textarea"
+                  id="description"
+                  name="description"
+                  rows="5"
+                  required></textarea>
+    </div>
+</div>

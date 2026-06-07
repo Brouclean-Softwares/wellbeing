@@ -63,7 +63,10 @@ async fn new(
     .await
     .or_else(|error| Err(error.log_and_redirect(redirect_if_error)))?;
 
-    Ok(Redirect::to(&format!("./moment?id={}", moment_id)))
+    Ok(Redirect::to(&format!(
+        "./moment?id={}&edit_mode=true",
+        moment_id
+    )))
 }
 
 #[derive(Deserialize)]

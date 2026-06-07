@@ -73,7 +73,8 @@ impl SatisfyingMoment {
                         satisfaction_level
                 FROM satisfying_moments
                 WHERE user_id = $1
-                AND lived_at = $2",
+                AND lived_at = $2
+                ORDER BY satisfaction_level DESC, lived_at ASC",
         )
         .bind(user_id.clone())
         .bind(lived_at.clone())

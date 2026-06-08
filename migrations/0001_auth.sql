@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     given_name VARCHAR,
     family_name VARCHAR,
     picture TEXT,
+    preferred_language VARCHAR,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

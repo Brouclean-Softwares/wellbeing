@@ -5,23 +5,53 @@
 {% endblock %}
 
 {% block body %}
-<div class="uk-grid-small uk-flex-middle" uk-grid>
+<div class="uk-grid-small uk-flex-middle uk-margin_medium_bottom" uk-grid>
     <div class="uk-width-auto">
-        <img src="{{ connected_profile.user.picture }}" class="uk-border-pill" width="75" height="75" alt="{{ connected_profile.user.name }}">
+        <img src="{{ user.picture }}" class="uk-border-pill" width="75" height="75" alt="{{ user.name }}">
     </div>
     
     <div class="uk-width-expand">
         <h2 class="uk-margin-remove-bottom">
-            {% if connected_profile.is_admin %}
+            {% if user_is_admin %}
                 (Administrateur)
             {% else %}
-                {{ connected_profile.user.name }}
+                {{ user.name }}
             {% endif %}
         </h2>
 
         <p class="uk-margin-remove-top">
-            {{ connected_profile.user.email }}
+            {{ user.email }}
         </p>
     </div>
 </div>
+
+<form action="/users/user" method="post" autocomplete="off" class="uk-form-stacked">
+    <input type="hidden" name="id" value="{{ user.id }}">
+
+    <div class="uk-margin-medium-top">
+        <label class="uk-form-label" for="preferred_language">
+            {{ connected_profile.translate("preferred_language") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <select id="preferred_language" name="preferred_language" class="uk-select">
+                {% for language in Language::accepted_languages() %}
+
+                {% if let Some(preferred_language) = user.preferred_language() %}
+                <option value="{{ language.0 }}" {% if preferred_language.eq(language) %}selected{% endif %}>{{ language }}</option>
+                {% else %}
+                <option value="{{ language.0 }}">{{ language }}</option>
+                {% endif %}
+
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="uk-margin-medium-top">
+        <button class="uk-button uk-button-primary" uk-icon="pencil" type="submit">
+            {{ connected_profile.translate("update") }}
+        </button>
+    </div>
+</form>
 {% endblock %}

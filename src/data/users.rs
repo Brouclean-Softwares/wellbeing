@@ -119,7 +119,7 @@ where
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = AppState::from_ref(state);
 
-        let language = parts.extensions.get::<Language>().cloned().unwrap();
+        let mut language = parts.extensions.get::<Language>().cloned().unwrap();
 
         let timezone = parts
             .headers
@@ -140,6 +140,10 @@ where
 
             if let Some(user) = &user {
                 is_admin = user.is_admin(&state);
+
+                if let Some(preferred_language) = &user.preferred_language() {
+                    language = preferred_language.clone();
+                }
 
                 user.extend_session_and_delete_expired(&state, &token)
                     .await?;
@@ -170,6 +174,7 @@ pub struct User {
     pub given_name: String,
     pub family_name: String,
     pub picture: String,
+    pub preferred_language: Option<String>,
 }
 
 impl<S> FromRequestParts<S> for User
@@ -186,9 +191,21 @@ where
     }
 }
 
+impl PartialEq for User {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
 impl User {
     pub fn is_admin(&self, state: &AppState) -> bool {
         state.admin_email.eq(&self.email)
+    }
+
+    pub fn preferred_language(&self) -> Option<Language> {
+        self.preferred_language
+            .clone()
+            .and_then(|language| Some(Language::from(language)))
     }
 
     pub async fn select_connected_user(
@@ -203,7 +220,8 @@ impl User {
                         users.name,
                         users.given_name,
                         users.family_name,
-                        users.picture
+                        users.picture,
+                        users.preferred_language
                 FROM sessions
                 LEFT JOIN users
                 ON sessions.user_id = users.id
@@ -237,7 +255,8 @@ impl User {
                             name,
                             given_name,
                             family_name,
-                            picture
+                            picture,
+                            preferred_language
                     FROM users
                     WHERE id = $1
                     LIMIT 1",
@@ -261,7 +280,8 @@ impl User {
                         name,
                         given_name,
                         family_name,
-                        picture
+                        picture,
+                        preferred_language
                 FROM users
                 WHERE email = $1
                 LIMIT 1",
@@ -271,5 +291,35 @@ impl User {
         .await?;
 
         Ok(user)
+    }
+
+    pub async fn update(
+        &self,
+        state: &AppState,
+        connected_profile: &ConnectedProfile,
+    ) -> Result<(), AppError> {
+        tracing::debug!(
+            "update with user_id={} by user_id={}",
+            self.id,
+            connected_profile.user.id,
+        );
+
+        if !connected_profile.is_admin && connected_profile.user.ne(self) {
+            return Err(AppError::Unauthorized(Profile::from(
+                connected_profile.clone(),
+            )));
+        }
+
+        sqlx::query(
+            "UPDATE users
+                SET preferred_language = $2
+                WHERE id = $1",
+        )
+        .bind(self.id.clone())
+        .bind(self.preferred_language.clone())
+        .execute(&state.db)
+        .await?;
+
+        Ok(())
     }
 }

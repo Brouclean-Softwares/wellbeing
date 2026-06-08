@@ -5,7 +5,9 @@ use fluent_templates::Loader;
 use fluent_templates::fluent_bundle::FluentValue;
 use icu::datetime::DateTimeFormatter;
 use std::borrow::Cow;
+use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::fmt::Formatter;
 use std::iter::Iterator;
 use unic_langid::{LanguageIdentifier, langid};
 
@@ -26,6 +28,41 @@ fn map_lang_to_supported_language(lang: &str) -> Option<LanguageIdentifier> {
 
 #[derive(Clone, Debug)]
 pub struct Language(pub LanguageIdentifier);
+
+impl std::fmt::Display for Language {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let language_name = LOCALES.lookup(&self.0, "language_name");
+        let language_flag = LOCALES.lookup(&self.0, "language_flag");
+
+        write!(f, "{} {}", language_name, language_flag)
+    }
+}
+
+impl From<String> for Language {
+    fn from(lang: String) -> Self {
+        Self::from_browser_accepted_languages([lang].to_vec())
+    }
+}
+
+impl Eq for Language {}
+
+impl PartialEq<Self> for Language {
+    fn eq(&self, other: &Self) -> bool {
+        self.0 == other.0
+    }
+}
+
+impl PartialOrd<Self> for Language {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.0.partial_cmp(&other.0)
+    }
+}
+
+impl Ord for Language {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.0.to_string().cmp(&other.0.to_string())
+    }
+}
 
 impl Language {
     fn from_browser_accepted_languages(browser_accepted_languages: Vec<String>) -> Self {
@@ -53,6 +90,12 @@ impl Language {
             .locales()
             .map(|locale| Self(locale.clone()))
             .collect()
+    }
+
+    pub fn sorted_accepted_languages() -> Vec<Self> {
+        let mut accepted_languages = Self::accepted_languages();
+        accepted_languages.sort();
+        accepted_languages
     }
 
     pub async fn detect_language(request: Request, next: Next) -> Result<Response, Response> {

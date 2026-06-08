@@ -47,7 +47,7 @@ impl GoogleUserInfo {
                         picture = $5,
                         last_updated = CURRENT_TIMESTAMP
                     WHERE id = $1
-                    RETURNING users.id, users.email, users.name, given_name, family_name, users.picture",
+                    RETURNING users.id, users.email, users.name, given_name, family_name, users.picture, users.preferred_language",
             )
                 .bind(user.id.clone())
                 .bind(self.name.clone())
@@ -63,7 +63,7 @@ impl GoogleUserInfo {
                 "INSERT INTO users (email, name, given_name, family_name, picture)
                 VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT (email) DO NOTHING
-                RETURNING users.id, users.email, users.name, given_name, family_name, users.picture",
+                RETURNING users.id, users.email, users.name, given_name, family_name, users.picture, users.preferred_language",
             )
                 .bind(self.email.clone())
                 .bind(self.name.clone())

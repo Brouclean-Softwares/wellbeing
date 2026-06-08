@@ -11,10 +11,13 @@ delete_confirmation_description = Vous êtes sur le point de supprimer des donn�
 
 google_button_text = Continuer avec Google
 
-language = 🇫🇷
+language_flag = 🇫🇷
 language_name = Français
 
 none_yet_question = Aucun pour le moment ?
+
+preferred_language = Langue préférée
+preferred_language_none = Aucune langue préférée
 
 satisfying_moment_new = Nouveau moment satisfaisant
 satisfying_moment = Moment satisfaisant

@@ -11,10 +11,13 @@ delete_confirmation_description = You are about to delete data, do you confirm ?
 
 google_button_text = Continue with Google
 
-language = 🇺🇸
+language_flag = 🇺🇸
 language_name = English
 
 none_yet_question = None yet ?
+
+preferred_language = Preferred language
+preferred_language_none = No preferred language
 
 satisfying_moment_new = New satisfying moment
 satisfying_moment = Satisfying moment

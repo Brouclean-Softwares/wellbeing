@@ -5,11 +5,18 @@
 {% endblock %}
 
 {% block body %}
-<h2>
-    {{ profile.translate("unauthorized") }}
-</h2>
+<div class="uk-text-center">
+    <h2>
+        {{ profile.translate("unauthorized") }}
+    </h2>
 
-<p>
-    {{ profile.translate("unauthorized_description") }}
-</p>
+    <p>
+        {{ profile.translate("unauthorized_description") }}
+    </p>
+</div>
+
+{% if profile.user.is_none() %}
+{% include "auth/sign-in_block.html" %}
+{% endif %}
+
 {% endblock %}

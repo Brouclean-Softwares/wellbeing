@@ -5,15 +5,20 @@
 {% endblock %}
 
 {% block body %}
-<h2>
-    {{ profile.translate("welcome") }}
-</h2>
+<div class="uk-text-center">
+    <h2 class="uk-margin-large-bottom">
+        {{ profile.translate("welcome") }}
+    </h2>
 
-<p>
-    {{ profile.translate("application_goal") }}
-</p>
+    <h3 class="uk-margin-large-bottom">
+        {{ profile.translate("application_slogan") }}
+    </h3>
 
-<p>
-    {% include "auth/google_button.html" %}
-</p>
+    <p class="uk-margin-large-bottom">
+        {{ profile.translate("application_goal") }}
+    </p>
+</div>
+
+{% include "auth/sign-in_block.html" %}
+
 {% endblock %}

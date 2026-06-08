@@ -1,6 +1,9 @@
 <h3>
     {{ connected_profile.translate("satisfying_moments_of_day") }}
+    <a href="#satisfying_moments_info" uk-toggle uk-icon="icon: info" class="uk-margin-small-left uk-text-meta"></a>
 </h3>
+
+{% include "satisfying_moments/satisfying_moments_info.html" %}
 
 {% for satisfying_moment in satisfying_moments %}
 <div class="uk-card uk-card-hover uk-card-body uk-border-rounded">

@@ -120,8 +120,8 @@
         </div>
     </div>
 
-    <div class="uk-margin-medium-top">
-        <a class="uk-button uk-button-default uk-margin-right"
+    <div class="uk-margin-medium-top uk-align-right">
+        <a class="uk-button uk-button-default"
            uk-icon="close"
            href="moment?id={{ satisfying_moment.id }}&edit_mode=false">
             {{ connected_profile.translate("cancel") }}
@@ -147,7 +147,7 @@
 
 <p class="uk-text-meta uk-margin-remove-top">
     <a class="uk-link-reset" href="/journal/of_day?day={{ satisfying_moment.lived_at }}">
-        <span uk-icon="icon: arrow-right"></span>
+        <span uk-icon="icon: arrow-left"></span>
         <span>{{ connected_profile.translate_relative_date(satisfying_moment.lived_at) }}</span>
     </a>
 </p>
@@ -174,8 +174,8 @@
 </p>
 {% endif %}
 
-<div class="uk-margin-medium-top">
-    <a class="uk-button uk-button-primary uk-margin-right"
+<div class="uk-margin-medium-top uk-align-right">
+    <a class="uk-button uk-button-primary"
        uk-icon="pencil"
        href="moment?id={{ satisfying_moment.id }}&edit_mode=true">
         {{ connected_profile.translate("update") }}
@@ -183,6 +183,7 @@
 
     {{ delete_button|escape("none") }}
 </div>
+
 
 {% endif %}
 

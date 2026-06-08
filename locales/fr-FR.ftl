@@ -35,6 +35,7 @@ user_not_found = Utilisateur introuvable
 user_profile = Profil
 
 welcome = Bienvenue
+welcome_with_love = Bienvenue ❤️
 welcome_name_with_love = Bienvenue { $name } ❤️
 what_day = Quel jour était-ce ?
 what_description = Que s'est-il passé ?

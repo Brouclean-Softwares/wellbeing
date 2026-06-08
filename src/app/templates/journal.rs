@@ -1,6 +1,7 @@
 use crate::app::templates::NavigationBar;
 use crate::data::users::ConnectedProfile;
 use crate::dates::WithTimeZone;
+use crate::languages::Translator;
 use askama::Template;
 use askama_web::WebTemplate;
 use chrono::NaiveDate;
@@ -31,6 +32,7 @@ impl JournalOfDayPage {
 #[derive(Template, WebTemplate)]
 #[template(path = "journal/day_navigation.html")]
 pub struct DayNavigation {
+    connected_profile: ConnectedProfile,
     previous_day: Option<NaiveDate>,
     day: NaiveDate,
     next_day: Option<NaiveDate>,
@@ -51,6 +53,7 @@ impl DayNavigation {
         let next_day = if day < today { day.succ_opt() } else { None };
 
         Self {
+            connected_profile,
             previous_day,
             day,
             next_day,

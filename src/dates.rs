@@ -13,4 +13,13 @@ pub trait WithTimeZone {
             .naive_local()
             .date()
     }
+
+    fn previous_day(&self, date: &NaiveDate) -> NaiveDate {
+        date.pred_opt()
+            .expect("Should be able to process previous day")
+    }
+
+    fn next_day(&self, date: &NaiveDate) -> NaiveDate {
+        date.succ_opt().expect("Should be able to process next day")
+    }
 }

@@ -28,6 +28,9 @@ satisfying_moments_of_day = Moments satisfaisants de la journée
 sign-in = Se connecter
 sign-out = Se déconnecter
 
+today = Aujourd'hui
+tomorrow = Demain
+
 unauthorized = Non autorisé
 unauthorized_description = Vous n'avez pas les droits pour voir ces informations
 update = Modifier
@@ -44,3 +47,5 @@ what_thoughts = Quelles émotions, pensées et sensations celà vous a généré
 what_title = Comment voulez-vous l'appelez ?
 what_values_alignment = En quoi celà parle de vos valeurs ?
 why_it_matters = En quoi est-ce important pour vous ?
+
+yesterday = Hier

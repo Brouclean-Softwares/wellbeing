@@ -1,7 +1,9 @@
 use crate::dates::WithTimeZone;
 use axum::{extract::Request, middleware::Next, response::Response};
+use chrono::{Datelike, NaiveDate};
 use fluent_templates::Loader;
 use fluent_templates::fluent_bundle::FluentValue;
+use icu::datetime::DateTimeFormatter;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::iter::Iterator;
@@ -87,5 +89,40 @@ pub trait Translator: WithTimeZone {
         args: &HashMap<Cow<'static, str>, FluentValue>,
     ) -> String {
         LOCALES.lookup_with_args(&self.language().0, text_id, args)
+    }
+
+    fn translate_relative_date(&self, date: &NaiveDate) -> String {
+        let today = self.today();
+        let yesterday = self.previous_day(&today);
+        let tomorrow = self.next_day(&today);
+
+        match date {
+            _today if today.eq(_today) => self.translate("today"),
+            _yesterday if yesterday.eq(_yesterday) => self.translate("yesterday"),
+            _tomorrow if tomorrow.eq(_tomorrow) => self.translate("tomorrow"),
+
+            date => {
+                let Language(locale_identifier) = self.language();
+
+                let locale: icu::locale::Locale = locale_identifier
+                    .to_string()
+                    .parse()
+                    .expect("Locale should be valid anyway");
+
+                let formatter_fieldsets = icu::datetime::fieldsets::YMDE::long();
+
+                let date_formatter = DateTimeFormatter::try_new(locale.into(), formatter_fieldsets)
+                    .expect("date formatter should be valid anyway");
+
+                let icu_date = icu::calendar::Date::try_new_iso(
+                    date.year(),
+                    date.month() as u8,
+                    date.day() as u8,
+                )
+                .expect("date should be valid anyway");
+
+                date_formatter.format(&icu_date).to_string()
+            }
+        }
     }
 }

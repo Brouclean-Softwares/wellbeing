@@ -147,7 +147,8 @@
 
 <p class="uk-text-meta uk-margin-remove-top">
     <a class="uk-link-reset" href="/journal/of_day?day={{ satisfying_moment.lived_at }}">
-        <span uk-icon="icon: arrow-right" class="uk-margin-right">{{ satisfying_moment.lived_at }}</span>
+        <span uk-icon="icon: arrow-right"></span>
+        <span>{{ connected_profile.translate_relative_date(satisfying_moment.lived_at) }}</span>
     </a>
 </p>
 

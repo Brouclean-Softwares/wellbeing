@@ -28,6 +28,9 @@ satisfying_moments_of_day = Satisfying moments of the day
 sign-in = Sign-in
 sign-out = Sign-out
 
+today = Today
+tomorrow = Tomorrow
+
 unauthorized = Unauthorized
 unauthorized_description = You do not have permission to view this information
 update = Update
@@ -44,3 +47,5 @@ what_thoughts = What emotions, thoughts, and sensations did it evoke?
 what_title = What would you like to call this moment?
 what_values_alignment = How does this reflect your values?
 why_it_matters = Why does this matter to you?
+
+yesterday = Yesterday

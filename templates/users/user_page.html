@@ -35,7 +35,7 @@
 
         <div class="uk-form-controls">
             <select id="preferred_language" name="preferred_language" class="uk-select">
-                {% for language in Language::accepted_languages() %}
+                {% for language in Language::sorted_accepted_languages() %}
 
                 {% if let Some(preferred_language) = user.preferred_language() %}
                 <option value="{{ language.0 }}" {% if preferred_language.eq(language) %}selected{% endif %}>{{ language }}</option>

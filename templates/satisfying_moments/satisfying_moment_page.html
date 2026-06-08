@@ -32,9 +32,12 @@
         </div>
     </div>
 
-    <div class="uk-margin-top">
+    <div class="uk-margin-top"
+         x-data="{ satisfaction: {{ satisfying_moment.satisfaction_level.unwrap_or(5) }} }">
+
         <label class="uk-form-label" for="satisfaction_level">
-            {{ connected_profile.translate("what_satisfaction_level") }}
+            <span class="uk-margin-small-right">{{ connected_profile.translate("what_satisfaction_level") }}</span>
+            <span><strong x-text="satisfaction"></strong>/10⭐</span>
         </label>
 
         <div class="uk-form-controls">
@@ -42,8 +45,10 @@
                    id="satisfaction_level"
                    name="satisfaction_level"
                    type="range"
-                   min="0" max="10" step="1"
-                   value="{{ satisfying_moment.satisfaction_level.unwrap_or(5) }}">
+                   min="0"
+                   max="10"
+                   step="1"
+                   x-model="satisfaction">
         </div>
     </div>
 

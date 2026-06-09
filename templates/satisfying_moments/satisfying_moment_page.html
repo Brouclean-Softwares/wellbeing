@@ -6,15 +6,43 @@
 
 {% block body %}
 
-{% if edit_mode %}
-
-<h2>
-    {{ connected_profile.translate("satisfying_moment") }}
+<h2 class="uk-text-center">
+    <a class="uk-link-reset" href="/journal/of_day?day={{ satisfying_moment.lived_at }}">
+        <span uk-icon="icon: arrow-left"></span>
+        <span>{{ connected_profile.translate_relative_date(satisfying_moment.lived_at) }}</span>
+    </a>
 </h2>
+
+<h3 class="uk-margin-remove-bottom">
+    {{ satisfying_moment.title }}
+</h3>
+
+{% if let Some(satisfaction_level) = satisfying_moment. satisfaction_level %}
+<p class="uk-text-meta uk-margin-remove">
+    {% for _ in 0..satisfaction_level as usize %}⭐{% endfor %}
+</p>
+{% endif %}
+
+{% if edit_mode %}
 
 <form action="/satisfying_moments/moment" method="post" autocomplete="off" class="uk-form-stacked">
     <input type="hidden" name="id" value="{{ satisfying_moment.id }}">
     <input type="hidden" name="user_id" value="{{ satisfying_moment.user_id }}">
+
+    <div class="uk-margin-top">
+        <label class="uk-form-label" for="lived_at">
+            {{ connected_profile.translate("what_day") }}
+        </label>
+
+        <div class="uk-form-controls">
+            <input class="uk-input"
+                   id="lived_at"
+                   name="lived_at"
+                   type="date"
+                   value="{{ satisfying_moment.lived_at }}"
+                   required>
+        </div>
+    </div>
 
     <div>
         <label class="uk-form-label" for="title">
@@ -49,21 +77,6 @@
                    max="10"
                    step="1"
                    x-model="satisfaction">
-        </div>
-    </div>
-
-    <div class="uk-margin-top">
-        <label class="uk-form-label" for="lived_at">
-            {{ connected_profile.translate("what_day") }}
-        </label>
-
-        <div class="uk-form-controls">
-            <input class="uk-input"
-                   id="lived_at"
-                   name="lived_at"
-                   type="date"
-                   value="{{ satisfying_moment.lived_at }}"
-                   required>
         </div>
     </div>
 
@@ -134,23 +147,6 @@
 </form>
 
 {% else %}
-
-<h2 class="uk-margin-remove-bottom">
-    {{ satisfying_moment.title }}
-</h2>
-
-{% if let Some(satisfaction_level) = satisfying_moment. satisfaction_level %}
-<p class="uk-text-meta uk-margin-remove">
-    {% for _ in 0..satisfaction_level as usize %}⭐{% endfor %}
-</p>
-{% endif %}
-
-<p class="uk-text-meta uk-margin-remove-top">
-    <a class="uk-link-reset" href="/journal/of_day?day={{ satisfying_moment.lived_at }}">
-        <span uk-icon="icon: arrow-left"></span>
-        <span>{{ connected_profile.translate_relative_date(satisfying_moment.lived_at) }}</span>
-    </a>
-</p>
 
 <p>
     {{ satisfying_moment.description }}

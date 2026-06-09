@@ -6,19 +6,7 @@
 {% include "satisfying_moments/satisfying_moments_info.html" %}
 
 {% for satisfying_moment in satisfying_moments %}
-<div class="uk-card uk-card-hover uk-card-body uk-border-rounded">
-    <a class="uk-link-reset" href="/satisfying_moments/moment?id={{ satisfying_moment.id }}&day={{ satisfying_moment.lived_at }}">
-        <h4 class="uk-card-title uk-margin-remove-bottom">{{ satisfying_moment.title }}</h4>
-
-        {% if let Some(satisfaction_level) = satisfying_moment. satisfaction_level %}
-        <p class="uk-text-meta uk-margin-remove">
-            {% for _ in 0..satisfaction_level as usize %}⭐{% endfor %}
-        </p>
-        {% endif %}
-
-        <p class="uk-margin-remove-top">{{ satisfying_moment.description }}</p>
-    </a>
-</div>
+{{ SatisfyingMomentCard::from_without_date(connected_profile.clone(), satisfying_moment.clone())|escape("none") }}
 {% endfor %}
 
 {% if satisfying_moments.len() == 0 %}

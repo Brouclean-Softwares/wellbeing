@@ -53,6 +53,35 @@ impl SatisfyingMomentsOfDay {
 }
 
 #[derive(Template, WebTemplate)]
+#[template(path = "satisfying_moments/satisfying_moment_card.html")]
+pub struct SatisfyingMomentCard {
+    connected_profile: ConnectedProfile,
+    satisfying_moment: SatisfyingMoment,
+    with_date: bool,
+}
+
+impl SatisfyingMomentCard {
+    pub fn from(
+        connected_profile: ConnectedProfile,
+        satisfying_moment: SatisfyingMoment,
+        with_date: bool,
+    ) -> Self {
+        Self {
+            connected_profile,
+            satisfying_moment,
+            with_date,
+        }
+    }
+
+    pub fn from_without_date(
+        connected_profile: ConnectedProfile,
+        satisfying_moment: SatisfyingMoment,
+    ) -> Self {
+        Self::from(connected_profile, satisfying_moment, false)
+    }
+}
+
+#[derive(Template, WebTemplate)]
 #[template(path = "satisfying_moments/satisfying_moment_page.html")]
 pub struct SatisfyingMomentPage {
     navigation_bar: NavigationBar,

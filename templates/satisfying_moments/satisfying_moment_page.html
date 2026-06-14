@@ -17,11 +17,11 @@
     {{ satisfying_moment.title }}
 </h3>
 
-{% if let Some(satisfaction_level) = satisfying_moment. satisfaction_level %}
-<p class="uk-text-meta uk-margin-remove">
-    {% for _ in 0..satisfaction_level as usize %}⭐{% endfor %}
+<p class="uk-text-meta uk-margin-remove-top">
+    {% if let Some(satisfaction_level) = satisfying_moment. satisfaction_level %}
+    <span>{% for _ in 0..satisfaction_level as usize %}⭐{% endfor %}</span>
+    {% endif %}
 </p>
-{% endif %}
 
 {% if edit_mode %}
 
@@ -44,7 +44,7 @@
         </div>
     </div>
 
-    <div>
+    <div class="uk-margin-top">
         <label class="uk-form-label" for="title">
             {{ connected_profile.translate("what_title") }}
         </label>
@@ -65,7 +65,7 @@
 
         <label class="uk-form-label" for="satisfaction_level">
             <span class="uk-margin-small-right">{{ connected_profile.translate("what_satisfaction_level") }}</span>
-            <span><strong x-text="satisfaction"></strong>/10⭐</span>
+            <span><span x-text="satisfaction"></span>/10⭐</span>
         </label>
 
         <div class="uk-form-controls">

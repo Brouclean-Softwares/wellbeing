@@ -20,7 +20,7 @@ impl Session {
                 VALUES (
                     (SELECT id FROM users WHERE email = $1 LIMIT 1),
                     $2,
-                    CURRENT_TIMESTAMP + interval '4 hours'
+                    CURRENT_TIMESTAMP + interval '48 hours'
                 )",
         )
         .bind(user_mail)
@@ -36,7 +36,7 @@ impl Session {
 
         sqlx::query(
             "UPDATE sessions
-                SET expires_at = CURRENT_TIMESTAMP + interval '4 hours'
+                SET expires_at = CURRENT_TIMESTAMP + interval '48 hours'
                 WHERE token = $1
                 AND user_id = $2
                 AND expires_at > CURRENT_TIMESTAMP",

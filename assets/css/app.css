@@ -22,3 +22,15 @@ body, h1, h2, h3, h4, h5, h6 {
 .uk-navbar-nav > li > a.uk-active {
     color: #6be197 !important;
 }
+
+.mobile-nav {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    height: 70px;
+}
+
+.uk-section {
+    margin-bottom: 70px;
+}

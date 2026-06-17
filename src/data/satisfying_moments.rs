@@ -84,6 +84,66 @@ impl SatisfyingMoment {
         Ok(satisfying_moments)
     }
 
+    pub async fn select_maximum_satisfaction_level_lived_at_for_user(
+        state: &AppState,
+        user_id: &i64,
+        lived_at: &NaiveDate,
+    ) -> Result<Option<i16>, AppError> {
+        tracing::debug!(
+            "select_maximum_satisfaction_level_lived_at_for_user at {} with user_id={}",
+            lived_at,
+            user_id,
+        );
+
+        let maximum_satisfaction_level: Option<i16> = sqlx::query_scalar(
+            "SELECT MAX(satisfaction_level)
+                FROM satisfying_moments
+                WHERE user_id = $1
+                AND lived_at = $2",
+        )
+        .bind(user_id.clone())
+        .bind(lived_at.clone())
+        .fetch_optional(&state.db)
+        .await?;
+
+        Ok(maximum_satisfaction_level)
+    }
+
+    pub async fn select_lived_during_month_for_user(
+        state: &AppState,
+        user_id: &i64,
+        lived_at: &NaiveDate,
+    ) -> Result<Vec<Self>, AppError> {
+        tracing::debug!(
+            "select_lived_during_month_for_user at {} with user_id={}",
+            lived_at,
+            user_id,
+        );
+
+        let satisfying_moments: Vec<SatisfyingMoment> = sqlx::query_as(
+            "SELECT id,
+                        user_id,
+                        title,
+                        description,
+                        thoughts,
+                        why_it_matters,
+                        values_alignment,
+                        lived_at,
+                        satisfaction_level
+                FROM satisfying_moments
+                WHERE user_id = $1
+                AND lived_at >= DATE_TRUNC('month', $2::date)
+                AND lived_at < DATE_TRUNC('month', $2::date) + INTERVAL '1 month'
+                ORDER BY satisfaction_level DESC, lived_at ASC",
+        )
+        .bind(user_id.clone())
+        .bind(lived_at.clone())
+        .fetch_all(&state.db)
+        .await?;
+
+        Ok(satisfying_moments)
+    }
+
     pub async fn insert_new(
         state: &AppState,
         user_id: &i64,

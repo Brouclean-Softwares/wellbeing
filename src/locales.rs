@@ -27,9 +27,9 @@ fn map_lang_to_supported_language(lang: &str) -> Option<LanguageIdentifier> {
 }
 
 #[derive(Clone, Debug)]
-pub struct Language(pub LanguageIdentifier);
+pub struct Locale(pub LanguageIdentifier);
 
-impl std::fmt::Display for Language {
+impl std::fmt::Display for Locale {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let language_name = LOCALES.lookup(&self.0, "language_name");
         let language_flag = LOCALES.lookup(&self.0, "language_flag");
@@ -38,33 +38,33 @@ impl std::fmt::Display for Language {
     }
 }
 
-impl From<String> for Language {
+impl From<String> for Locale {
     fn from(lang: String) -> Self {
         Self::from_browser_accepted_languages([lang].to_vec())
     }
 }
 
-impl Eq for Language {}
+impl Eq for Locale {}
 
-impl PartialEq<Self> for Language {
+impl PartialEq<Self> for Locale {
     fn eq(&self, other: &Self) -> bool {
         self.0 == other.0
     }
 }
 
-impl PartialOrd<Self> for Language {
+impl PartialOrd<Self> for Locale {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.0.partial_cmp(&other.0)
     }
 }
 
-impl Ord for Language {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+impl Ord for Locale {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.0.to_string().cmp(&other.0.to_string())
     }
 }
 
-impl Language {
+impl Locale {
     fn from_browser_accepted_languages(browser_accepted_languages: Vec<String>) -> Self {
         for browser_accepted_language in browser_accepted_languages {
             if let Some(language) = LOCALES
@@ -119,11 +119,23 @@ impl Language {
     }
 }
 
-pub trait Translator: WithTimeZone {
-    fn language(&self) -> Language;
+pub trait Localized {
+    fn locale(&self) -> Locale;
 
+    fn week_day_number(&self, date: &NaiveDate) -> u32 {
+        let Locale(locale_identifier) = self.locale();
+
+        match locale_identifier.to_string().as_str() {
+            "en-US" => date.weekday().number_from_sunday(),
+
+            _ => date.weekday().number_from_monday(),
+        }
+    }
+}
+
+pub trait Translator: WithTimeZone + Localized {
     fn translate(&self, text_id: &str) -> String {
-        LOCALES.lookup(&self.language().0, text_id)
+        LOCALES.lookup(&self.locale().0, text_id)
     }
 
     fn translate_with_args(
@@ -131,7 +143,7 @@ pub trait Translator: WithTimeZone {
         text_id: &str,
         args: &HashMap<Cow<'static, str>, FluentValue>,
     ) -> String {
-        LOCALES.lookup_with_args(&self.language().0, text_id, args)
+        LOCALES.lookup_with_args(&self.locale().0, text_id, args)
     }
 
     fn translate_relative_date(&self, date: &NaiveDate) -> String {
@@ -145,7 +157,7 @@ pub trait Translator: WithTimeZone {
             _tomorrow if tomorrow.eq(_tomorrow) => self.translate("tomorrow"),
 
             date => {
-                let Language(locale_identifier) = self.language();
+                let Locale(locale_identifier) = self.locale();
 
                 let locale: icu::locale::Locale = locale_identifier
                     .to_string()
@@ -167,5 +179,25 @@ pub trait Translator: WithTimeZone {
                 date_formatter.format(&icu_date).to_string()
             }
         }
+    }
+
+    fn translate_month(&self, date: &NaiveDate) -> String {
+        let Locale(locale_identifier) = self.locale();
+
+        let locale: icu::locale::Locale = locale_identifier
+            .to_string()
+            .parse()
+            .expect("Locale should be valid anyway");
+
+        let formatter_fieldsets = icu::datetime::fieldsets::YM::long();
+
+        let date_formatter = DateTimeFormatter::try_new(locale.into(), formatter_fieldsets)
+            .expect("date formatter should be valid anyway");
+
+        let icu_date =
+            icu::calendar::Date::try_new_iso(date.year(), date.month() as u8, date.day() as u8)
+                .expect("date should be valid anyway");
+
+        date_formatter.format(&icu_date).to_string()
     }
 }

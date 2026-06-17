@@ -6,6 +6,24 @@
                 <a class="uk-navbar-item uk-logo" href="/">
                     <img src="/assets/images/logo_white_horizontal.png" width="175" height="150" alt="logo">
                 </a>
+
+                {% if profile.user.is_some() %}
+                <ul class="uk-navbar-nav uk-visible@s">
+                    <li>
+                        <a href="/">
+                            <span uk-icon="home"></span><br>
+                            <small>{{ profile.translate("home") }}</small>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="/journal/of_month">
+                            <span uk-icon="calendar"></span><br>
+                            <small>{{ profile.translate("journal") }}</small>
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
             </div>
 
             <div class="uk-navbar-right">
@@ -55,3 +73,17 @@
         </div>
     </div>
 </nav>
+
+{% if profile.user.is_some() %}
+<div class="mobile-nav uk-position-fixed uk-position-bottom uk-background-default uk-flex uk-flex-around uk-padding-small uk-hidden@s">
+    <a href="/" class="uk-text-center uk-link-reset">
+        <span uk-icon="home"></span><br>
+        <small>{{ profile.translate("home") }}</small>
+    </a>
+
+    <a href="/journal/of_month" class="uk-text-center uk-link-reset">
+        <span uk-icon="calendar"></span><br>
+        <small>{{ profile.translate("journal") }}</small>
+    </a>
+</div>
+{% endif %}

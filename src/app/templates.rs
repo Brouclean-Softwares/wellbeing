@@ -1,5 +1,5 @@
 use crate::data::users::{ConnectedProfile, Profile};
-use crate::languages::Translator;
+use crate::locales::Translator;
 use askama::Template;
 use askama_web::WebTemplate;
 use std::borrow::Cow;

@@ -3,7 +3,7 @@ use crate::auth::SESSION_TOKEN;
 use crate::data::sessions::Session;
 use crate::dates::WithTimeZone;
 use crate::errors::AppError;
-use crate::languages::{Language, Translator};
+use crate::locales::{Locale, Localized, Translator};
 use axum::extract::{FromRef, FromRequestParts};
 use axum_extra::extract::PrivateCookieJar;
 use chrono::TimeZone;
@@ -31,12 +31,12 @@ where
 pub struct ConnectedProfile {
     pub is_admin: bool,
     pub user: User,
-    pub language: Language,
+    pub language: Locale,
     pub timezone: Tz,
 }
 
-impl Translator for ConnectedProfile {
-    fn language(&self) -> Language {
+impl Localized for ConnectedProfile {
+    fn locale(&self) -> Locale {
         self.language.clone()
     }
 }
@@ -46,6 +46,8 @@ impl WithTimeZone for ConnectedProfile {
         self.timezone
     }
 }
+
+impl Translator for ConnectedProfile {}
 
 impl TryFrom<Profile> for ConnectedProfile {
     type Error = AppError;
@@ -82,12 +84,12 @@ where
 pub struct Profile {
     pub is_admin: bool,
     pub user: Option<User>,
-    pub language: Language,
+    pub language: Locale,
     pub timezone: Tz,
 }
 
-impl Translator for Profile {
-    fn language(&self) -> Language {
+impl Localized for Profile {
+    fn locale(&self) -> Locale {
         self.language.clone()
     }
 }
@@ -97,6 +99,8 @@ impl WithTimeZone for Profile {
         self.timezone
     }
 }
+
+impl Translator for Profile {}
 
 impl From<ConnectedProfile> for Profile {
     fn from(connected_profile: ConnectedProfile) -> Self {
@@ -119,7 +123,7 @@ where
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let state = AppState::from_ref(state);
 
-        let mut language = parts.extensions.get::<Language>().cloned().unwrap();
+        let mut language = parts.extensions.get::<Locale>().cloned().unwrap();
 
         let timezone = parts
             .headers
@@ -202,10 +206,10 @@ impl User {
         state.admin_email.eq(&self.email)
     }
 
-    pub fn preferred_language(&self) -> Option<Language> {
+    pub fn preferred_language(&self) -> Option<Locale> {
         self.preferred_language
             .clone()
-            .and_then(|language| Some(Language::from(language)))
+            .and_then(|language| Some(Locale::from(language)))
     }
 
     pub async fn select_connected_user(

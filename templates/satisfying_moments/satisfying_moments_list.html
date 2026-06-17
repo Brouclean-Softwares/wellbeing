@@ -1,20 +1,22 @@
 <h3>
-    {{ connected_profile.translate("satisfying_moments_of_day") }}
+    <span>{{ list_title }}</span>
     <a href="#satisfying_moments_info" uk-toggle uk-icon="icon: info" class="uk-margin-small-left uk-text-meta"></a>
 </h3>
 
 {% include "satisfying_moments/satisfying_moments_info.html" %}
 
-{% for satisfying_moment in satisfying_moments %}
-{{ SatisfyingMomentCard::from_without_date(connected_profile.clone(), satisfying_moment.clone())|escape("none") }}
+{% for satisfying_moment_card in satisfying_moment_cards %}
+{{ satisfying_moment_card|escape("none") }}
 {% endfor %}
 
-{% if satisfying_moments.len() == 0 %}
+{% if satisfying_moment_cards.len() == 0 %}
 <p>
     {{ connected_profile.translate("none_yet_question") }}
 </p>
 {% endif %}
 
+{% if let Some(add_modal_button) = add_modal_button %}
 <div class="uk-margin-small-top uk-align-right">
     {{ add_modal_button|escape("none") }}
 </div>
+{% endif %}

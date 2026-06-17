@@ -1,8 +1,8 @@
 use crate::AppState;
-use crate::Language;
+use crate::Locale;
 use crate::app::templates::NavigationBar;
 use crate::data::users::{ConnectedProfile, User};
-use crate::languages::Translator;
+use crate::locales::Translator;
 use askama::Template;
 use askama_web::WebTemplate;
 

@@ -1,5 +1,5 @@
 use crate::auth::google::GoogleOAuthClient;
-use crate::languages::Language;
+use crate::locales::Locale;
 use axum::{Router, extract::FromRef};
 use axum_extra::extract::cookie::Key;
 use dotenv::dotenv;
@@ -14,7 +14,7 @@ pub mod auth;
 pub mod data;
 pub mod dates;
 pub mod errors;
-pub mod languages;
+pub mod locales;
 
 #[tokio::main]
 async fn main() {
@@ -80,7 +80,7 @@ fn init_router(state: AppState) -> Router {
             "/manifest.webmanifest",
             ServeFile::new("assets/manifest.webmanifest"),
         )
-        .layer(axum::middleware::from_fn(Language::detect_language))
+        .layer(axum::middleware::from_fn(Locale::detect_language))
         .with_state(state)
 }
 

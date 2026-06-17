@@ -4,6 +4,7 @@ application_goal = Wellbeing offers you simple, accessible positive psychology e
 
 back = Back
 
+calendar = Calendar
 cancel = Cancel
 confirm = Confirm
 
@@ -12,6 +13,10 @@ delete_confirmation_title = Delete confirmation
 delete_confirmation_description = You are about to delete data, do you confirm ?
 
 google_button_text = Continue with Google
+
+home = Home
+
+journal = Journal
 
 language_flag = 🇺🇸
 language_name = English

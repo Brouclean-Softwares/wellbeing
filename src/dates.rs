@@ -1,4 +1,11 @@
 use chrono::{NaiveDate, NaiveDateTime, TimeZone, Utc};
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
+pub enum DateLevel {
+    Day,
+    Month,
+}
 
 pub trait WithTimeZone {
     fn timezone(&self) -> impl TimeZone;

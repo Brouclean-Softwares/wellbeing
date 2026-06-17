@@ -4,6 +4,7 @@ application_goal = Wellbeing vous propose des exercices de psychologie positive,
 
 back = Retour
 
+calendar = Calendrier
 cancel = Annuler
 confirm = Confirmer
 
@@ -12,6 +13,10 @@ delete_confirmation_title = Confirmation de la suppression
 delete_confirmation_description = Vous êtes sur le point de supprimer des données. Vous confirmez ?
 
 google_button_text = Continuer avec Google
+
+home = Accueil
+
+journal = Journal
 
 language_flag = 🇫🇷
 language_name = Français

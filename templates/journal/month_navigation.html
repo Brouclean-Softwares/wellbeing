@@ -1,0 +1,60 @@
+<div class="uk-child-width-1-3" uk-grid>
+    <div class="uk-text-left uk-width-expand">
+        {% if let Some(previous_month_date) = previous_month_date %}
+        <div>
+            <a class="uk-link-reset" href="/journal/of_month?day={{ previous_month_date }}">
+                <span uk-icon="arrow-left"></span>
+                <span class="uk-visible@m">{{ connected_profile.translate_month(previous_month_date) }}</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="uk-text-center uk-width-max-content">
+        <h2>
+            {{ connected_profile.translate_month(month_start_date) }}
+        </h2>
+    </div>
+
+    <div class="uk-text-right uk-width-expand">
+        {% if let Some(next_month_date) = next_month_date %}
+        <div>
+            <a class="uk-link-reset" href="/journal/of_month?day={{ next_month_date }}">
+                <span class="uk-visible@m">{{ connected_profile.translate_month(next_month_date) }}</span>
+                <span uk-icon="arrow-right"></span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="uk-text-center uk-align-center uk-width-max-content">
+    <table>
+        {% for week in calendar %}
+        <tr>
+            {% for journal_day in week %}
+
+            {% if let Some(journal_day) = journal_day %}
+            <td style="width: 50px;">
+                <a class="uk-link-reset" href="/journal/of_day?day={{ journal_day.date }}">
+                    <dl class="uk-description-list">
+                        <dt>{{ journal_day.date.day() }}</dt>
+                        <dd class="uk-text-meta">
+                            {% if let Some(maximum_satisfaction_level) = journal_day.maximum_satisfaction_level %}
+                            <span>{{ maximum_satisfaction_level }}⭐</span>
+                            {% else %}
+                            <span>&nbsp;</span>
+                            {% endif %}
+                        </dd>
+                    </dl>
+                </a>
+            </td>
+            {% else %}
+            <td></td>
+            {% endif %}
+
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>

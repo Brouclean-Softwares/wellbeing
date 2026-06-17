@@ -1,7 +1,7 @@
 use crate::AppState;
 use crate::app::handlers::DeleteForm;
 use crate::app::handlers::journal::OfDayParams;
-use crate::app::templates::satisfying_moments::{SatisfyingMomentPage, SatisfyingMomentsOfDay};
+use crate::app::templates::satisfying_moments::{SatisfyingMomentPage, SatisfyingMomentsList};
 use crate::data::satisfying_moments::SatisfyingMoment;
 use crate::data::users::ConnectedProfile;
 use crate::dates::WithTimeZone;
@@ -16,6 +16,7 @@ use serde::Deserialize;
 pub fn init_router() -> Router<AppState> {
     Router::new()
         .route("/of_day", get(of_day))
+        .route("/of_month", get(of_month))
         .route("/new", post(new))
         .route("/moment", get(moment).post(update))
         .route("/delete", post(delete))
@@ -25,17 +26,38 @@ async fn of_day(
     State(app_state): State<AppState>,
     connected_profile: ConnectedProfile,
     Query(params): Query<OfDayParams>,
-) -> Result<SatisfyingMomentsOfDay, AppError> {
+) -> Result<SatisfyingMomentsList, AppError> {
     let day = params.day.unwrap_or(connected_profile.today());
 
     let satisfying_moments =
         SatisfyingMoment::select_lived_at_for_user(&app_state, &connected_profile.user.id, &day)
             .await?;
 
-    Ok(SatisfyingMomentsOfDay::from(
+    Ok(SatisfyingMomentsList::from(
         connected_profile,
-        day,
         satisfying_moments,
+        Some(day),
+    ))
+}
+
+async fn of_month(
+    State(app_state): State<AppState>,
+    connected_profile: ConnectedProfile,
+    Query(params): Query<OfDayParams>,
+) -> Result<SatisfyingMomentsList, AppError> {
+    let day = params.day.unwrap_or(connected_profile.today());
+
+    let satisfying_moments = SatisfyingMoment::select_lived_during_month_for_user(
+        &app_state,
+        &connected_profile.user.id,
+        &day,
+    )
+    .await?;
+
+    Ok(SatisfyingMomentsList::from(
+        connected_profile,
+        satisfying_moments,
+        None,
     ))
 }
 

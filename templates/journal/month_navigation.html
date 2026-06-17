@@ -35,7 +35,7 @@
             {% for journal_day in week %}
 
             {% if let Some(journal_day) = journal_day %}
-            <td style="width: 50px;">
+            <td style="width: 50px;" {% if journal_day.is_today(connected_profile) %}class="today"{% endif %}>
                 <a class="uk-link-reset" href="/journal/of_day?day={{ journal_day.date }}">
                     <dl class="uk-description-list">
                         <dt>{{ journal_day.date.day() }}</dt>

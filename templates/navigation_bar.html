@@ -33,9 +33,9 @@
                     <div class="uk-visible@m">
                         <span class="uk-text-emphasis">
                             {% if profile.is_admin %}
-                                (Administrateur)
+                                <span>({{ profile.translate("administrator") }})</span>
                             {% else %}
-                                {{ user.name }}
+                                <span>{{ user.name }}</span>
                             {% endif %}
                         </span>
                         <br>{{ user.email }}

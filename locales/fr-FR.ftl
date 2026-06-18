@@ -1,4 +1,5 @@
 add = Ajouter
+administrator = Administrateur
 application_slogan = Et si vous pouviez transformer votre quotidien en une source de bien-être ?
 application_goal = Wellbeing vous propose des exercices de psychologie positive, simples et accessibles, pour cultiver la gratitude, renforcer votre confiance en vous et vivre chaque jour avec plus de sérénité. Rejoignez-nous et commencez dès aujourd’hui à prendre soin de votre esprit.
 

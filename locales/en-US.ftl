@@ -1,4 +1,5 @@
 add = Add
+administrator = Administrator
 application_slogan = What if you could turn your daily life into a source of wellbeing?
 application_goal = Wellbeing offers you simple, accessible positive psychology exercises to cultivate gratitude, boost your self-confidence, and live each day with greater serenity. Join us and start taking care of your mind today.
 

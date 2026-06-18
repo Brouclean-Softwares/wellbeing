@@ -13,9 +13,9 @@
     <div class="uk-width-expand">
         <h2 class="uk-margin-remove-bottom">
             {% if user_is_admin %}
-                (Administrateur)
+                <span>({{ connected_profile.translate("administrator") }})</span>
             {% else %}
-                {{ user.name }}
+                <span>{{ user.name }}</span>
             {% endif %}
         </h2>
 
@@ -36,13 +36,7 @@
         <div class="uk-form-controls">
             <select id="preferred_language" name="preferred_language" class="uk-select">
                 {% for language in Locale::sorted_accepted_languages() %}
-
-                {% if let Some(preferred_language) = user.preferred_language() %}
-                <option value="{{ language.0 }}" {% if preferred_language.eq(language) %}selected{% endif %}>{{ language }}</option>
-                {% else %}
-                <option value="{{ language.0 }}">{{ language }}</option>
-                {% endif %}
-
+                <option value="{{ language.0 }}" {% if connected_profile.language.eq(language) %}selected{% endif %}>{{ language }}</option>
                 {% endfor %}
             </select>
         </div>

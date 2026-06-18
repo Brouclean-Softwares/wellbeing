@@ -13,6 +13,7 @@ chrono-tz = "0.10"
 chrono = { version = "0.4", features = ["clock"] }
 dotenv = "0.15"
 fluent-templates = "0.14"
+hex = "0.4"
 http = "1.4"
 icu = "2.2"
 oauth2 = "5.0"

@@ -137,6 +137,8 @@ where
 
         let token = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
 
+        tracing::debug!("------------- Session token: {:?}", token);
+
         if let Some(token) = token {
             let user = User::select_connected_user(&state, &token).await?;
 

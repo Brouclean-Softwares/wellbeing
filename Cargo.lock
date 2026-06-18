@@ -3569,6 +3569,7 @@ dependencies = [
  "chrono-tz",
  "dotenv",
  "fluent-templates",
+ "hex",
  "http",
  "icu",
  "oauth2",

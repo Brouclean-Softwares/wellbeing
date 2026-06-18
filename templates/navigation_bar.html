@@ -43,14 +43,28 @@
                 </div>
                 <div class="uk-navbar-dropdown">
                     <ul class="uk-nav uk-navbar-dropdown-nav">
+                        {% if profile.is_admin %}
                         <li>
-                            <a href="/auth/profile">
-                                <span uk-icon="icon: user"></span>{{ profile.translate("user_profile") }}
+                            <a href="/users">
+                                <span uk-icon="icon: users"></span>
+                                <span>{{ profile.translate("users") }}</span>
                             </a>
                         </li>
+
+                        <li class="uk-nav-divider"></li>
+                        {% endif %}
+
+                        <li>
+                            <a href="/auth/profile">
+                                <span uk-icon="icon: user"></span>
+                                <span>{{ profile.translate("user_profile") }}</span>
+                            </a>
+                        </li>
+
                         <li>
                             <a href="/auth/sign_out">
-                                <span uk-icon="icon: sign-out"></span>{{ profile.translate("sign-out") }}
+                                <span uk-icon="icon: sign-out"></span>
+                                <span>{{ profile.translate("sign-out") }}</span>
                             </a>
                         </li>
                     </ul>
@@ -77,12 +91,14 @@
 {% if profile.user.is_some() %}
 <div class="mobile-nav uk-position-fixed uk-position-bottom uk-background-default uk-flex uk-flex-around uk-padding-small uk-hidden@s">
     <a href="/" class="uk-text-center uk-link-reset">
-        <span uk-icon="home"></span><br>
+        <span uk-icon="home"></span>
+        <br>
         <small>{{ profile.translate("home") }}</small>
     </a>
 
     <a href="/journal/of_month" class="uk-text-center uk-link-reset">
-        <span uk-icon="calendar"></span><br>
+        <span uk-icon="calendar"></span>
+        <br>
         <small>{{ profile.translate("journal") }}</small>
     </a>
 </div>

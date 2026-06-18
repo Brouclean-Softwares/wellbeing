@@ -27,6 +27,26 @@ where
     }
 }
 
+pub struct AdminProfile(pub ConnectedProfile);
+
+impl<S> FromRequestParts<S> for AdminProfile
+where
+    S: Send + Sync,
+    AppState: FromRef<S>,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let connected_profile = ConnectedProfile::from_request_parts(parts, state).await?;
+
+        if connected_profile.is_admin {
+            Ok(AdminProfile(connected_profile))
+        } else {
+            Err(AppError::Unauthorized(connected_profile.into()))
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct ConnectedProfile {
     pub is_admin: bool,
@@ -136,8 +156,6 @@ where
             PrivateCookieJar::from_request_parts(parts, &state).await?;
 
         let token = cookie_jar.get(SESSION_TOKEN).map(|c| c.value().to_owned());
-
-        tracing::debug!("------------- Session token: {:?}", token);
 
         if let Some(token) = token {
             let user = User::select_connected_user(&state, &token).await?;
@@ -249,6 +267,26 @@ impl User {
     ) -> Result<(), AppError> {
         Session::extend(state, &self.id, token).await?;
         Session::delete_expired(state, &self.id).await
+    }
+
+    pub async fn select_all(state: &AppState) -> Result<Vec<Self>, AppError> {
+        tracing::debug!("select_all");
+
+        let users: Vec<User> = sqlx::query_as(
+            "SELECT id,
+                        email,
+                        name,
+                        given_name,
+                        family_name,
+                        picture,
+                        preferred_language
+                FROM users
+                ORDER BY name",
+        )
+        .fetch_all(&state.db)
+        .await?;
+
+        Ok(users)
     }
 
     pub async fn select_by_id(state: &AppState, id: Option<i64>) -> Result<Option<Self>, AppError> {

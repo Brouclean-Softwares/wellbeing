@@ -13,6 +13,8 @@ delete = Supprimer
 delete_confirmation_title = Confirmation de la suppression
 delete_confirmation_description = Vous êtes sur le point de supprimer des données. Vous confirmez ?
 
+email = Email
+
 google_button_text = Continuer avec Google
 
 home = Accueil
@@ -21,7 +23,9 @@ journal = Journal
 
 language_flag = 🇫🇷
 language_name = Français
+last_session_expiration_time = Last session expiration time
 
+name = Nom
 none_yet_question = Aucun pour le moment ?
 
 preferred_language = Langue préférée
@@ -45,6 +49,7 @@ tomorrow = Demain
 unauthorized = Non autorisé
 unauthorized_description = Vous n'avez pas les droits pour voir ces informations
 update = Modifier
+users = Utilisateurs
 user_not_found = Utilisateur introuvable
 user_profile = Profil
 

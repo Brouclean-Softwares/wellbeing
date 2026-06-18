@@ -1,0 +1,74 @@
+{% extends "page_base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.8/css/dataTables.dataTables.css" />
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/2.3.8/js/dataTables.js"></script>
+{% endblock %}
+
+{% block navbar %}
+{{ navigation_bar|escape("none") }}
+{% endblock %}
+
+{% block body %}
+
+<h2>
+    {{ connected_profile.translate("users") }}
+</h2>
+
+<div class="uk-overflow-auto">
+    <table id="users" class="uk-table uk-table-striped uk-table-small uk-table-hover">
+        <thead>
+        <tr>
+            <th>{{ connected_profile.translate("name") }}</th>
+            <th>{{ connected_profile.translate("email") }}</th>
+            <th>{{ connected_profile.translate("last_session_expiration_time") }}</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for session in sessions %}
+
+        {% let user = session.user %}
+        {% let last_expiration = session.last_expiration %}
+        {% let user_url = format!("/users/user?id={}", user.id) %}
+
+        <tr>
+            <td class="uk-table-link" data-order="{{ user.name }}">
+                <a class="uk-link-reset" href="{{ user_url }}">
+                    <img class="uk-border-pill uk-margin-small-right" src="{{ user.picture }}" width="30" height="30" alt=" ">
+                    <span>{{ user.name }}</span>
+                </a>
+            </td>
+
+            <td class="uk-table-link" data-order="{{ user.email }}">
+                <a class="uk-link-reset" href="{{ user_url }}">
+                    {{ user.email }}
+                </a>
+            </td>
+
+            <td class="uk-table-link">
+                <a class="uk-link-reset" href="{{ user_url }}">
+                    {% if let Some(last_expiration) = last_expiration %}
+                    <span>{{ connected_profile.translate_date_time(last_expiration) }}</span>
+                    {% endif %}
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    new DataTable('#users', {
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        language: {
+            url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/{{ language_identifier }}.json'
+        }
+    });
+</script>
+
+{% endblock %}

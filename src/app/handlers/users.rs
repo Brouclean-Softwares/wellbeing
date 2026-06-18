@@ -1,6 +1,7 @@
 use crate::AppState;
-use crate::app::templates::users::UserPage;
-use crate::data::users::{ConnectedProfile, User};
+use crate::app::templates::users::{UserPage, UsersPage};
+use crate::data::sessions::Session;
+use crate::data::users::{AdminProfile, ConnectedProfile, User};
 use crate::errors::AppError;
 use axum::extract::{Query, State};
 use axum::response::Redirect;
@@ -9,7 +10,24 @@ use axum::{Form, Router};
 use serde::Deserialize;
 
 pub fn init_router() -> Router<AppState> {
-    Router::new().route("/user", get(user).post(update))
+    Router::new()
+        .route("/", get(users))
+        .route("/user", get(user).post(update))
+}
+
+async fn users(
+    State(app_state): State<AppState>,
+    AdminProfile(connected_profile): AdminProfile,
+) -> Result<UsersPage, AppError> {
+    let users = User::select_all(&app_state).await?;
+
+    let mut sessions: Vec<Session> = Vec::with_capacity(users.len());
+
+    for user in users {
+        sessions.push(Session::try_from(&app_state, user).await?);
+    }
+
+    Ok(UsersPage::from(connected_profile, sessions))
 }
 
 #[derive(Deserialize)]

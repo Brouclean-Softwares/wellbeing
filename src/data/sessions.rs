@@ -1,14 +1,28 @@
 use crate::AppState;
+use crate::data::users::User;
 use crate::errors::AppError;
+use chrono::{DateTime, Utc};
 
-pub struct Session {}
+pub struct Session {
+    pub user: User,
+    pub last_expiration: Option<DateTime<Utc>>,
+}
 
 impl Session {
+    pub async fn try_from(state: &AppState, user: User) -> Result<Self, AppError> {
+        let last_expiration = Self::select_last_expiration_for_user(state, &user.id).await?;
+
+        Ok(Self {
+            user,
+            last_expiration,
+        })
+    }
+
     pub async fn upsert(
         state: &AppState,
         user_mail: String,
         session_id: String,
-    ) -> Result<Self, AppError> {
+    ) -> Result<(), AppError> {
         tracing::debug!("upsert for user_mail={}", user_mail);
 
         sqlx::query(
@@ -28,7 +42,7 @@ impl Session {
         .execute(&state.db)
         .await?;
 
-        Ok(Session {})
+        Ok(())
     }
 
     pub async fn extend(state: &AppState, user_id: &i64, token: &String) -> Result<(), AppError> {
@@ -78,5 +92,23 @@ impl Session {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn select_last_expiration_for_user(
+        state: &AppState,
+        user_id: &i64,
+    ) -> Result<Option<DateTime<Utc>>, AppError> {
+        tracing::debug!("select_last_expiration_for_user for user_id={}", user_id);
+
+        let last_expiration: Option<DateTime<Utc>> = sqlx::query_scalar(
+            "SELECT MAX(expires_at)
+                FROM sessions
+                WHERE user_id = $1",
+        )
+        .bind(user_id.clone())
+        .fetch_optional(&state.db)
+        .await?;
+
+        Ok(last_expiration)
     }
 }

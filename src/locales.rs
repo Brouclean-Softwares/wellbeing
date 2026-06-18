@@ -1,6 +1,6 @@
 use crate::dates::WithTimeZone;
 use axum::{extract::Request, middleware::Next, response::Response};
-use chrono::{Datelike, NaiveDate};
+use chrono::{DateTime, Datelike, NaiveDate, Utc};
 use fluent_templates::Loader;
 use fluent_templates::fluent_bundle::FluentValue;
 use icu::datetime::DateTimeFormatter;
@@ -179,6 +179,28 @@ pub trait Translator: WithTimeZone + Localized {
                 date_formatter.format(&icu_date).to_string()
             }
         }
+    }
+
+    fn translate_date_time(&self, date_time: &DateTime<Utc>) -> String {
+        let Locale(locale_identifier) = self.locale();
+
+        let locale: icu::locale::Locale = locale_identifier
+            .to_string()
+            .parse()
+            .expect("Locale should be valid anyway");
+
+        let formatter_fieldsets = icu::datetime::fieldsets::YMDET::long();
+
+        let date_formatter = DateTimeFormatter::try_new(locale.into(), formatter_fieldsets)
+            .expect("date formatter should be valid anyway");
+
+        let rfc9557_date_time = format!("{}[UTC]", date_time.to_rfc3339());
+
+        let icu_date_time =
+            icu::time::DateTime::try_from_str(&rfc9557_date_time, icu::calendar::Gregorian)
+                .unwrap();
+
+        date_formatter.format(&icu_date_time).to_string()
     }
 
     fn translate_month(&self, date: &NaiveDate) -> String {

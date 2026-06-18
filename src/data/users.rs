@@ -1,5 +1,6 @@
 use crate::AppState;
 use crate::auth::SESSION_TOKEN;
+use crate::data::satisfying_moments::SatisfyingMoment;
 use crate::data::sessions::Session;
 use crate::dates::WithTimeZone;
 use crate::errors::AppError;
@@ -258,6 +259,10 @@ impl User {
         .await?;
 
         Ok(connected_user)
+    }
+
+    pub async fn select_last_month_entries_count(&self, state: &AppState) -> Result<i64, AppError> {
+        SatisfyingMoment::select_last_month_entries_count(&state, &self.id).await
     }
 
     async fn extend_session_and_delete_expired(

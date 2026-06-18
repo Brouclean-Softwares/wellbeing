@@ -24,12 +24,16 @@
             <th>{{ connected_profile.translate("name") }}</th>
             <th>{{ connected_profile.translate("email") }}</th>
             <th>{{ connected_profile.translate("last_session_expiration_time") }}</th>
+            <th>{{ connected_profile.translate("last_month_entries_count") }}</th>
         </tr>
         </thead>
 
         <tbody>
-        {% for session in sessions %}
+        {% for session_with_entries_count in sessions_with_entries_count %}
 
+        {% let session = session_with_entries_count.0 %}
+        {% let entries_count = session_with_entries_count.1 %}
+        
         {% let user = session.user %}
         {% let last_expiration = session.last_expiration %}
         {% let user_url = format!("/users/user?id={}", user.id) %}
@@ -53,6 +57,12 @@
                     {% if let Some(last_expiration) = last_expiration %}
                     <span>{{ connected_profile.translate_date_time(last_expiration) }}</span>
                     {% endif %}
+                </a>
+            </td>
+
+            <td class="uk-table-link" data-order="{{ entries_count }}">
+                <a class="uk-link-reset" href="{{ user_url }}">
+                    {{ entries_count }}
                 </a>
             </td>
         </tr>

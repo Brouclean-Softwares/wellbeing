@@ -21,10 +21,13 @@ async fn users(
 ) -> Result<UsersPage, AppError> {
     let users = User::select_all(&app_state).await?;
 
-    let mut sessions: Vec<Session> = Vec::with_capacity(users.len());
+    let mut sessions: Vec<(Session, i64)> = Vec::with_capacity(users.len());
 
     for user in users {
-        sessions.push(Session::try_from(&app_state, user).await?);
+        let last_month_entries_count = user.select_last_month_entries_count(&app_state).await?;
+        let session = Session::try_from(&app_state, user).await?;
+
+        sessions.push((session, last_month_entries_count));
     }
 
     Ok(UsersPage::from(connected_profile, sessions))

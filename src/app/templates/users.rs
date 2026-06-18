@@ -14,18 +14,21 @@ pub struct UsersPage {
     navigation_bar: NavigationBar,
     connected_profile: ConnectedProfile,
     language_identifier: LanguageIdentifier,
-    sessions: Vec<Session>,
+    sessions_with_entries_count: Vec<(Session, i64)>,
 }
 
 impl UsersPage {
-    pub fn from(connected_profile: ConnectedProfile, sessions: Vec<Session>) -> Self {
+    pub fn from(
+        connected_profile: ConnectedProfile,
+        sessions_with_entries_count: Vec<(Session, i64)>,
+    ) -> Self {
         let Locale(language_identifier) = connected_profile.language.clone();
 
         Self {
             navigation_bar: NavigationBar::from(connected_profile.clone()),
             connected_profile,
             language_identifier,
-            sessions,
+            sessions_with_entries_count,
         }
     }
 }

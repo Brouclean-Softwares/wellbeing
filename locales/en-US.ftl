@@ -23,6 +23,7 @@ journal = Journal
 
 language_flag = 🇺🇸
 language_name = English
+last_month_entries_count = Last month entries count
 last_session_expiration_time = Last session expiration time
 
 name = Name

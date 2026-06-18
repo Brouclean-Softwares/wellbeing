@@ -17,6 +17,25 @@ pub struct SatisfyingMoment {
 }
 
 impl SatisfyingMoment {
+    pub async fn select_last_month_entries_count(
+        state: &AppState,
+        user_id: &i64,
+    ) -> Result<i64, AppError> {
+        tracing::debug!("select_last_month_entries_count for user_id={}", user_id,);
+
+        let count: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) 
+                    FROM satisfying_moments
+                    WHERE user_id = $1
+                    AND created_at > CURRENT_TIMESTAMP - interval '31 days'",
+        )
+        .bind(user_id.clone())
+        .fetch_one(&state.db)
+        .await?;
+
+        Ok(count)
+    }
+
     pub async fn select_by_id_for_user(
         state: &AppState,
         user_id: &i64,

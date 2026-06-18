@@ -23,7 +23,7 @@ journal = Journal
 
 language_flag = 🇫🇷
 language_name = Français
-last_session_expiration_time = Last session expiration time
+last_session_expiration_time = Expiration de la dernière session
 
 name = Nom
 none_yet_question = Aucun pour le moment ?

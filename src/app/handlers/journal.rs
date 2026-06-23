@@ -6,6 +6,7 @@ use crate::data::journal::JournalMonth;
 use crate::data::users::ConnectedProfile;
 use crate::dates::{DateLevel, WithTimeZone};
 use crate::errors::AppError;
+use crate::locales::Translator;
 use askama_web::__askama_web_impl::axum_core_0_5::IntoResponse;
 use axum::Router;
 use axum::extract::{Query, State};
@@ -15,6 +16,7 @@ use serde::Deserialize;
 
 pub fn init_router() -> Router<AppState> {
     Router::new()
+        .route("/relative_date", get(relative_date))
         .route("/date_navigation", get(date_navigation))
         .route("/of_day", get(of_day))
         .route("/of_month", get(of_month))
@@ -24,6 +26,16 @@ pub fn init_router() -> Router<AppState> {
 pub struct OfDayParams {
     pub day: Option<NaiveDate>,
     pub date_level: Option<DateLevel>,
+}
+
+async fn relative_date(
+    connected_profile: ConnectedProfile,
+    Query(params): Query<OfDayParams>,
+) -> String {
+    params
+        .day
+        .and_then(|day| Some(connected_profile.translate_relative_date(&day)))
+        .unwrap_or_default()
 }
 
 async fn date_navigation(

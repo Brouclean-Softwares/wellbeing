@@ -9,7 +9,10 @@
 <h2 class="uk-text-center">
     <a class="uk-link-reset" href="/journal/of_day?day={{ satisfying_moment.lived_at }}">
         <span uk-icon="icon: arrow-left"></span>
-        <span>{{ connected_profile.translate_relative_date(satisfying_moment.lived_at) }}</span>
+        <span hx-get="/journal/relative_date?day={{ satisfying_moment.lived_at }}" 
+              hx-trigger="load" 
+              hx-swap="innerHTML" 
+              hx-headers='js:{ "X-Timezone": Intl.DateTimeFormat().resolvedOptions().timeZone }'></span>
     </a>
 </h2>
 

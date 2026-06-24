@@ -26,13 +26,24 @@ pub struct AuthRequest {
 #[derive(Deserialize, Debug, sqlx::FromRow, Clone, Default)]
 pub struct GoogleUserInfo {
     pub email: String,
-    pub name: String,
-    pub given_name: String,
-    pub family_name: String,
-    pub picture: String,
+    pub name: Option<String>,
+    pub given_name: Option<String>,
+    pub family_name: Option<String>,
+    pub picture: Option<String>,
 }
 
 impl GoogleUserInfo {
+    fn name(&self) -> String {
+        match (&self.name, &self.given_name, &self.family_name) {
+            (Some(name), _, _) => name.clone(),
+            (_, _, _) => format!(
+                "{} {}",
+                self.given_name.clone().unwrap_or_default(),
+                self.family_name.clone().unwrap_or_default()
+            ),
+        }
+    }
+
     pub async fn upsert(&self, state: &AppState) -> Result<User, AppError> {
         tracing::debug!("upsert for email={}", self.email);
 
@@ -50,10 +61,10 @@ impl GoogleUserInfo {
                     RETURNING users.id, users.email, users.name, given_name, family_name, users.picture, users.preferred_language",
             )
                 .bind(user.id.clone())
-                .bind(self.name.clone())
-                .bind(self.given_name.clone())
-                .bind(self.family_name.clone())
-                .bind(self.picture.clone())
+                .bind(self.name().clone())
+                .bind(self.given_name.clone().unwrap_or_default())
+                .bind(self.family_name.clone().unwrap_or_default())
+                .bind(self.picture.clone().unwrap_or_default())
                 .fetch_one(&state.db)
                 .await?;
 
@@ -66,10 +77,10 @@ impl GoogleUserInfo {
                 RETURNING users.id, users.email, users.name, given_name, family_name, users.picture, users.preferred_language",
             )
                 .bind(self.email.clone())
-                .bind(self.name.clone())
-                .bind(self.given_name.clone())
-                .bind(self.family_name.clone())
-                .bind(self.picture.clone())
+                .bind(self.name().clone())
+                .bind(self.given_name.clone().unwrap_or_default())
+                .bind(self.family_name.clone().unwrap_or_default())
+                .bind(self.picture.clone().unwrap_or_default())
                 .fetch_one(&state.db)
                 .await?;
 

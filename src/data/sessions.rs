@@ -106,7 +106,7 @@ impl Session {
                 WHERE user_id = $1",
         )
         .bind(user_id.clone())
-        .fetch_optional(&state.db)
+        .fetch_one(&state.db)
         .await?;
 
         Ok(last_expiration)

@@ -127,13 +127,12 @@ async fn update(
     connected_profile: ConnectedProfile,
     Form(moment): Form<SatisfyingMoment>,
 ) -> Result<Redirect, Redirect> {
-    let redirect = Redirect::to(&format!("/satisfying_moments/moment?id={}", moment.id));
-    let redirect_if_error = Redirect::to(&format!("/journal/of_day?day={}", moment.lived_at));
+    let redirect = Redirect::to(&format!("/journal/of_day?day={}", moment.lived_at));
 
     moment
         .update(&app_state, &connected_profile.user.id)
         .await
-        .or_else(|error| Err(error.log_and_redirect(redirect_if_error)))?;
+        .or_else(|error| Err(error.log_and_redirect(redirect.clone())))?;
 
     Ok(redirect)
 }

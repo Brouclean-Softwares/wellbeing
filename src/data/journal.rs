@@ -27,25 +27,29 @@ impl JournalMonth {
     }
 
     pub fn calendar(&self, localized: &impl Localized) -> Vec<Vec<Option<JournalDay>>> {
-        let mut calendar: Vec<Vec<Option<JournalDay>>> = Vec::with_capacity(42);
-
         let mut journal_iter = self.journal_days.iter();
         let mut journal_day = journal_iter.next();
 
-        let first_day_offset = localized.week_day_number(&journal_day.unwrap().date) - 1;
+        let first_day_offset = localized.week_day_number(&journal_day.unwrap().date) as usize - 1;
 
+        let week_number =
+            f64::ceil((self.journal_days.len() as f64 + first_day_offset as f64) / 7.0) as usize;
+
+        let mut calendar: Vec<Vec<Option<JournalDay>>> = Vec::with_capacity(week_number);
         let mut week = Vec::with_capacity(7);
 
-        for i in 0..42 {
-            if i < first_day_offset {
-                week.push(None);
-            } else if week.len() == 7 {
-                calendar.push(week.clone());
-                week = Vec::with_capacity(7);
-            } else {
-                week.push(journal_day.copied());
-                journal_day = journal_iter.next();
+        for w in 0..week_number {
+            for d in 0..7 {
+                if w == 0 && d < first_day_offset {
+                    week.push(None);
+                } else {
+                    week.push(journal_day.copied());
+                    journal_day = journal_iter.next();
+                }
             }
+
+            calendar.push(week.clone());
+            week = Vec::with_capacity(7);
         }
 
         calendar
